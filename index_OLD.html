@@ -1,0 +1,1958 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>Czelij Algorytmy detekcji twarzy i ich implementacja w systemach wbudowanych</title>
+
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+		<link rel="stylesheet" href="css/reset.css">
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/black.css">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/monokai.css">
+
+		<link rel="stylesheet" href="css/mystyles.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section>
+					<section>
+						<div class="container my-mobile-position">
+							<div class="row">
+								<div class="col-lg-6 col-md-6">
+									<h3>Algorytmy detekcji twarzy w obrazie i ich implementacja w systemach wbudowanych</h3>
+									<!-- <p> -->
+										<small style="text-align: center">Kierownik pracy: <a href="">Dr inż. Grzegorz Galiński (RTM)</a></small> <br>
+										<small style="text-align: left">Wykonał: <a href="">Marek Czelij</a></small>
+									<!-- </p> -->
+								</div>
+								<div class="col-lg-6 col-md-6">
+									<img class="my-diagram-style my-title-image" src="image/AnitaLogo.gif" alt="">
+								</div>
+							</div>
+						</div>
+						<!-- <h2>Algorytmy detekcji Twarzy i ich implementacja w systemach wbudowanych</h2>
+						<p>
+							<small>Kierownik pracy: <a href="">Dr inż. Grzegorz Galiński (RTM)</a></small>
+						</p>
+						<p>
+							<small>Wykonał: <a href="">Marek Czelij</a></small>
+						</p> -->
+						<!-- <img class="my-diagram-style my-title-image" src="image/ezgif-7-f33d7ad51415.gif" alt=""> -->
+					</section>
+				</section>
+				<section>
+					<section>
+						<h2>Plan prezentacji</h2>
+						<ul>
+							<small>
+								<li>Cel pracy</li>
+								<li>Artefakty powstałe w wyniku pracy</li>
+								<li>Systemy wbudowane</li>
+								<li>Technologie wykorzystywane przy implementacji algorytmów przetwarzania obrazu</li>
+								<li>Przegląd istniejących metod detekcji twarzy</li>
+								<li>Kryteria wyboru algorytmów do dalszej analizy</li>
+								<li>Opis systemu</li>
+								<li>Szacowanie pracochłonności</li>
+								<li>Wybrane algorytmy do implementacji</li>
+								<li>Algorytm podejmowania decyzji o rodzaju przetwarzania pobranego obrazu w celu detekcji twarzy</li>
+								<li>Wybrane platformy implementacji</li>
+								<li>Badania doświadczalne rozpatrywanych platform systemów wbudowanych</li>
+								<li>Wnioski</li>
+								<li>Podsumowanie</li>
+								<!-- <li>Definicja zadania detekcji twarzy</li> -->
+								<!-- <li>Zastosowania detekcji twarzy</li> -->
+								<!-- <li>Najczęściej stosowane metody detekcji twarzy</li>				 -->
+								<!-- <li>Definicja systemu wbudowanego</li> -->
+								<!-- <li>Cechy algorytmów detekcji twarzy pracujących w systemach wbudowanych</li> -->
+								<!-- <li>Notacja duże-O</li> -->
+								<!-- <li>Specyfikacja wymagań systemu wbudowanego</li> -->
+								<!-- <li>Aktorzy systemu</li> -->
+								<!-- <li>Wymagania niefunkcjonalne</li> -->
+								<!-- <li>Wymagania funkcjonalne</li> -->
+								<!-- <li>Wybrane algorytmy do implementacji</li>
+								<li>Rozważane platformy implementacji</li> -->
+								
+								<!-- <li>Dalsze plany</li> -->
+							</small>
+						</ul>
+					</section>
+				</section>
+				<section>
+					<section>
+						<h2>Cel pracy</h2>
+						<small>
+						<ul>
+							<li> Przegląd algorytmów i metod detekcji twarzy. </li> 
+							<li> Analiza wybranych algorytmów. </li>
+							<li> Przegląd typów platform systemów wbudowanych wykorzystywanych w przetwarzaniu obrazu. </li> 
+							<li> Analiza porównawcza wybranych platform systemów wbudowanych wykorzystywanych w przetwarzaniu obrazu. </li>
+							<li> Stworzenie opisu, oszacowanie systemu wbudowanego detekcji twarzy metodami inżynierii oprogramowania. </li>
+							<li> Przystosowanie oraz implementacja wybranych algorytmów na wybranych platformach, ewentualne stworzenie własnego rozwiązania. </li>
+							<li> Stworzenie fizycznego rozwiązania. </li>
+							<li> Analiza porównawcza wybranych technologii implementacji. </li>
+							<li> Analiza porównawcza wybranych platform sprzętowych. </li>
+							<li> Ocena wykorzystanych narzędzi inżynierii oprogramowania pod względem przydatności w opisie systemów wbudowanych. </li>
+							<li> Wybór najlepszego rozwiązania. </li>
+						</ul>
+						</small>
+					</section>
+				</section>
+				<section>
+					<section>
+						<h2>Artefakty powstałe w wyniku pracy</h2>
+						<div style="text-align: left;">
+							<small>
+								<!-- <p> W ramach pracy badaniom poddano następujące platformy: </p>
+								<ul>
+									<li> maszynę PC</li>  
+									<li> platformę mobilną</li> 
+									<li> platformę SBC</li> 
+								</ul> -->
+
+								<p>Na potrzeby pracy dla wybranych platform zaimplementowano następujące algorytmy:</p>
+								<ul>
+									<li> A fast and accurate unconstrained face detector} na maszynę PC oraz platformę SBC</li> 
+									<li> MobileNetV3+SSDLite na maszynę PC, platformę SBC, platformę mobilną</li> 
+									<li> własne rozwiązanie wspomagające algorytm Viola-Jones na maszynę PC, platformę SBC, platformę mobilną</li> 
+									<li> własne rozwiązanie wspomagające algorytm MobileNetV3+SSDLite na maszynę PC, platformę SBC, platformę mobilną</li> 
+								</ul>
+								
+								</small>
+						<!-- </ul> -->
+						</div>
+					</section>
+					<section>
+						<div style="text-align: left;">
+							<small>
+								<p>Model sieci neuronowej MobileNetV3+SSDLite opracowano do detekcji kilkunastu typów obiektów (oraz segmentacji regionów obrazu), pośród których nie było twarzy, dlatego w ramach pracy dostosowano model tej sieci do detekcji twarzy. Dotychczas nie natrafiono na informację o takim przystosowaniu tego modelu sieci.</p>
+										
+								<p>Dokonano identyfikacji wymagań systemu oraz dokonano oszacowania pracochłonności wytworzenia oprogramowania systemu wbudowanego, dedykowanego do detekcji twarzy w obrazie. </p>
+								
+								<p>W wyniku pracy stworzono następujące fizyczne systemy wbudowane:</p>
+								<ul>	
+									<li> system wbudowany bazujący na maszynie PC z zaimplementowanym własnym rozwiązaniem, wspomagającym algorytm MobileNetV3+SSDLite lub Viola-Jones</li> 
+									<li> system wbudowany bazujący na platformie mobilnej  z zaimplementowanym własnym rozwiązaniem, wspomagającym algorytm MobileNetV3+SSDLite lub Viola-Jones</li> 
+									<li> system wbudowany bazujący na platformie SBC z zaimplementowanym własnym rozwiązaniem, wspomagającym algorytm MobileNetV3+SSDLite lub Viola-Jones</li> 
+								</ul>
+								<p>Na podstawie przeprowadzonych badań oraz wyżej wymienionych systemów wbudowanych wybrano ten, który najlepiej spełnia założone kryteria.</p>
+							</small>
+						</div>
+					</section>
+				</section>
+				<section>
+					<section>
+						<h2>Systemy wbudowane</h2>
+						<div style="text-align: left;">
+						<small>
+							<p> <a href=""> Urządzenia wbudowane </a>- urządzenia stosowane, pracujące w systemach wbudowanych</p>
+							<p><a href="">System wbudowany</a> - kombinacja systemu komputerowego i software’u lub firmware’u stanowiąca część większego systemu/urządzenia, wykonująca ściśle określoną czynność, dla której został specjalnie zaprojektowany i stworzony.</p>
+							<p> Cele zastosowania urządzeń wbudowanych: </p>
+							<ul>
+								<li> implementacja wybranych algorytmów,</li>
+								<li> poprawienie efektywności algorytmów (np. wykorzystanie zrównoleglenia obliczeń),</li>
+								<li> wykorzystanie już istniejących narzędzi aby skupić się tylko na wartości dodanej projektu/aplikacji. </li>
+							</ul>
+						</small>
+						</div>
+					</section>
+					<section>
+						<div style="text-align: left;">
+						<small>
+							<p>W tej pracy wybrano system Linux, dystrybucje Ubuntu 18.04:</p>
+							<ul>
+							<li> operanie się na “linuxie” znaczącej ilości aplikacji w przemyśle na terenie Europy i USA,</li> 
+							<li> charakter open souce dystrybucji linuxa,</li> 
+							<li> modułowość jądra linuxa,</li>
+							<li> dostępność narzędzi programistycznych dla systemów opartych na “linuxie”.</li>
+						</ul>
+						</small>
+					</section>
+					<section>
+					<small style="text-align: left;">
+						<p>Z powodu charakteru systemów wbudowanych oraz faktu, że są one tworzone specjalnie do wykonywania ściśle określonego zadania, nie spotyka się oficjalnych wytycznych, benchmarków do oceny, do porównania czy tworzenia rankingu urządzeń wbudowanych. Prawdziwą wytyczną jest, jak dany system wbudowany spełnia swoje zadanie w praktyce. </p>
+						<p>Na podstawie zadania, do którego system wbudowany jest projektowany, można stworzyć swoje prywatne miary, których spełnienie przybliży do stworzenia systemu wbudowanego, który jak najlepiej sprawdza się w praktyce.</p>
+						<p>Na podstawie przeglądu literatury oraz doświadczenia zauważono kilka ogólnych kategorii, które można wykorzystać oraz przystosować do stworzenia własnych miar oceny systemu wbudowanego. Kategorie te podano poniżej:</p>	
+					</small>
+					</section>
+					<section>
+						<small style="text-align: left; font-size: 50%;">
+							<ul>
+								<li> Moc obliczeniowa - wybór procesora jest podyktowany często ilością mocy obliczeniowej potrzebnej do wykonywania zadania, do którego jest projektowany system wbudowany, w projektach o większym charakterze niskopoziomowym długość rejestrów też jest brana pod uwagę. </li>
+								<li> Osiągi, wydajność - szczególną uwagę tutaj należy zwrócić na czas wykonywania elementarnych instrukcji przez procesor oraz inne, zależne od zadania miary, jak np. ilość klatek na sekundę [FPS]. </li>
+								<li> Czas reakcji - czas reakcji systemu na zdarzenia, zmiany. </li>
+								<li> Ilość dostępnej pamięci - ilość pamięci dostępnej dla systemu wbudowanego musi być wystarczająca, należy też wziąć pod uwagę to czy jej ilość będzie dopasowana do zapotrzebowania czy też będzie jej więcej ze względu na możliwość wprowadzenia dodatkowych funkcji systemu. </li>
+								<li> Pobór mocy - należy ustalić czy system będzie posiadał własne źródło zasilania czy będzie korzystał z zasilania sieci. Zależy od tego wybór urządzeń wchodzących w skład systemu wbudowanego, ilość dostępnych zasobów czy rodzaj zastosowanego algorytmu.. </li>
+								<li> Temperatura pracy komponentów - np. średnia oraz maksymalna temperatura komponentów, podczas wykonywania zadania. </li>
+								<li> Ilość tworzonych rozwiązań - ilość produkowanych i sprzedawanych systemów wbudowanych - ma to wpływ na koszty produkcji czy tworzenia oprogramowania. </li>
+								<li> Koszt produkcji jednostkowej - koszt produkcji jednego systemu wbudowanego, bez kosztów jednorazowych. </li>
+								<li> Jednorazowy koszt projektowania (ang. Non-Recurring Engineering, NRE) systemu wbudowanego - koszty projektowania oraz inne, które ponosi się jednorazowo przy projektowaniu pierwszego rozwiązania. Nie ponosi się już ich przy produkcji kolejnych egzemplarzy. </li>
+								<li> Przewidywany czas pracy - wybór komponentów i koszt całkowity systemu wbudowanego będzie zależny od przewidzianego czasu pracy systemu. </li>
+								<li> Instalacja, aktualizacja oprogramowania - wymaga ustalenia, czy instalacja oprogramowania oraz jego aktualizacja musi być przeprowadzana przez osobę przeszkoloną, czy potrzeba specjalistycznych narzędzi do przeprowadzenia instalacji oprogramowania.. </li>
+								<li> Konieczność ustalenia, czy system wbudowany jest przystosowany do kontaktu z użytkownikiem, czy posiada klawiaturę, monitor oraz inne możliwości interakcji z użytkownikiem. </li>
+								<!-- <li> Możliwość oraz sposób testowania poprawnego działania systemu wbudowanego - czy do przeprowadzenia testów poprawności działania będą potrzebne specjalistyczne narzędzia. </li>
+								<li> Rzetelność - czy odpowiedź systemu zawsze musi być zgodna z restrykcjami czasowymi oraz czy jego odpowiedź zawsze jest prawidłowa; szczególnie ważne w twardych systemach czasu rzeczywistego. </li>
+								<li> Rozmiary fizyczne  - fizyczne rozmiary systemu wbudowanego, jak długość, szerokość, wysokość. </li>
+								<li> Waga - waga całego systemu wbudowanego. </li>
+								<li> Rozmiar oprogramowania/logiki - rozmiar oprogramowani w bajtach, kilobajtach albo np. ilość użytych tranzystorów dla systemów czysto hardware'owych. </li>
+								<li> Przenośność oprogramowania - możliwość przeniesienia oprogramowania z systemu wbudowanego do innego opartego na innych rozwiązaniach technologicznych. </li>
+								<li> Możliwość wprowadzania zmian do systemu - jak łatwo jest wprowadzać zmiany, nowe funkcji bez ponoszenia większych kosztów jednorazowych, np. zmiana platformy. </li>
+								<li> Wsparcie techniczne rozwiązania - przez jaki okres czasu oraz w jaki sposób jest zapewnione wsparcie techniczne dla użytkowania końcowego oraz w jaki sposób jest przeprowadzane. Lepsza jakość urządzenia oraz niezawodność zmniejszają potrzebę wsparcia końcowego. . </li>
+								<li> Czas projektowania oraz produkcji (ang. Time-to-market) - czas potrzebny dla zaprojektowania oraz produkcji rozwiązania, aby było ono gotowe do sprzedaży dla końcowego klienta. Składają się na to: czas projektowania, czas produkcji i testowania. Krótki czas projektowania oraz produkcji może zapewnić dużą konkurencyjność rozwiązania.. </li>
+								<li> Czas wytworzenia prototypu (ang. Time-to-prototype) - czas potrzeby do wytworzenia w pełni działającego prototypu. Koszta wytworzenia prototypu mogą być większe niż produktu końcowego. Prototyp pozwala przetestować poprawność, przydatność oraz zgodność z wymaganiami.. </li>
+								<li> Pewność poprawności rozwiązania - pewność, że rozwiązanie spełnia wszystkie zakładane wymagania funkcjonalne, niefunkcjonalne oraz wymóg poprawności jego działania . </li>
+								<li> Bezpieczeństwo - rozwiązanie nie spowoduje nieprzewidzianych zagrożeń oraz nie spowoduje sytuacji potencjalnie niebezpiecznych, jak np. samozapłon, czy wzrostu potencjalnego niebezpieczeństwa w sytuacjach nieprzewidzianych, jak np. niepożądane zachowanie oraz powodowanie większych strat dla użytkownika końcowego, np. przy przepięciu instalacji elektrycznej. </li> -->
+							</ul>	
+						</small>
+					</section>
+					<section>
+						<small style="text-align: left; font-size: 50%;">
+							<ul>
+								<!-- <li> Moc obliczeniowa - wybór procesora jest podyktowany często ilością mocy obliczeniowej potrzebnej do wykonywania zadania, do którego jest projektowany system wbudowany, w projektach o większym charakterze niskopoziomowym długość rejestrów też jest brana pod uwagę. </li>
+								<li> Osiągi, wydajność - szczególną uwagę tutaj należy zwrócić na czas wykonywania elementarnych instrukcji przez procesor oraz inne, zależne od zadania miary, jak np. ilość klatek na sekundę [FPS]. </li>
+								<li> Czas reakcji - czas reakcji systemu na zdarzenia, zmiany. </li>
+								<li> Ilość dostępnej pamięci - ilość pamięci dostępnej dla systemu wbudowanego musi być wystarczająca, należy też wziąć pod uwagę to czy jej ilość będzie dopasowana do zapotrzebowania czy też będzie jej więcej ze względu na możliwość wprowadzenia dodatkowych funkcji systemu. </li>
+								<li> Pobór mocy - należy ustalić czy system będzie posiadał własne źródło zasilania czy będzie korzystał z zasilania sieci. Zależy od tego wybór urządzeń wchodzących w skład systemu wbudowanego, ilość dostępnych zasobów czy rodzaj zastosowanego algorytmu.. </li>
+								<li> Temperatura pracy komponentów - np. średnia oraz maksymalna temperatura komponentów, podczas wykonywania zadania. </li>
+								<li> Ilość tworzonych rozwiązań - ilość produkowanych i sprzedawanych systemów wbudowanych - ma to wpływ na koszty produkcji czy tworzenia oprogramowania. </li>
+								<li> Koszt produkcji jednostkowej - koszt produkcji jednego systemu wbudowanego, bez kosztów jednorazowych. </li>
+								<li> Jednorazowy koszt projektowania (ang. Non-Recurring Engineering, NRE) systemu wbudowanego - koszty projektowania oraz inne, które ponosi się jednorazowo przy projektowaniu pierwszego rozwiązania. Nie ponosi się już ich przy produkcji kolejnych egzemplarzy. </li>
+								<li> Przewidywany czas pracy - wybór komponentów i koszt całkowity systemu wbudowanego będzie zależny od przewidzianego czasu pracy systemu. </li>
+								<li> Instalacja, aktualizacja oprogramowania - wymaga ustalenia, czy instalacja oprogramowania oraz jego aktualizacja musi być przeprowadzana przez osobę przeszkoloną, czy potrzeba specjalistycznych narzędzi do przeprowadzenia instalacji oprogramowania.. </li> -->
+								<!-- <li> Konieczność ustalenia, czy system wbudowany jest przystosowany do kontaktu z użytkownikiem, czy posiada klawiaturę, monitor oraz inne możliwości interakcji z użytkownikiem. </li> -->
+								<li> Możliwość oraz sposób testowania poprawnego działania systemu wbudowanego - czy do przeprowadzenia testów poprawności działania będą potrzebne specjalistyczne narzędzia. </li>
+								<li> Rzetelność - czy odpowiedź systemu zawsze musi być zgodna z restrykcjami czasowymi oraz czy jego odpowiedź zawsze jest prawidłowa; szczególnie ważne w twardych systemach czasu rzeczywistego. </li>
+								<li> Rozmiary fizyczne  - fizyczne rozmiary systemu wbudowanego, jak długość, szerokość, wysokość. </li>
+								<li> Waga - waga całego systemu wbudowanego. </li>
+								<li> Rozmiar oprogramowania/logiki - rozmiar oprogramowani w bajtach, kilobajtach albo np. ilość użytych tranzystorów dla systemów czysto hardware'owych. </li>
+								<li> Przenośność oprogramowania - możliwość przeniesienia oprogramowania z systemu wbudowanego do innego opartego na innych rozwiązaniach technologicznych. </li>
+								<li> Możliwość wprowadzania zmian do systemu - jak łatwo jest wprowadzać zmiany, nowe funkcje bez ponoszenia większych kosztów jednorazowych, np. zmiana platformy. </li>
+								<li> Wsparcie techniczne rozwiązania - przez jaki okres czasu oraz w jaki sposób jest zapewnione wsparcie techniczne dla użytkowania końcowego oraz w jaki sposób jest przeprowadzane. Lepsza jakość urządzenia oraz niezawodność zmniejszają potrzebę wsparcia końcowego. . </li>
+								<li> Czas projektowania oraz produkcji (ang. Time-to-market) - czas potrzebny dla zaprojektowania oraz produkcji rozwiązania, aby było ono gotowe do sprzedaży dla końcowego klienta. Składają się na to: czas projektowania, czas produkcji i testowania. Krótki czas projektowania oraz produkcji może zapewnić dużą konkurencyjność rozwiązania.. </li>
+								<li> Czas wytworzenia prototypu (ang. Time-to-prototype) - czas potrzeby do wytworzenia w pełni działającego prototypu. Koszta wytworzenia prototypu mogą być większe niż produktu końcowego. Prototyp pozwala przetestować poprawność, przydatność oraz zgodność z wymaganiami.. </li>
+								<li> Pewność poprawności rozwiązania - pewność, że rozwiązanie spełnia wszystkie zakładane wymagania funkcjonalne, niefunkcjonalne oraz wymóg poprawności jego działania . </li>
+								<li> Bezpieczeństwo - rozwiązanie nie spowoduje nieprzewidzianych zagrożeń oraz nie spowoduje sytuacji potencjalnie niebezpiecznych, jak np. samozapłon, czy wzrostu potencjalnego niebezpieczeństwa w sytuacjach nieprzewidzianych, jak np. niepożądane zachowanie oraz powodowanie większych strat dla użytkownika końcowego, np. przy przepięciu instalacji elektrycznej. </li>
+							</ul>	
+						</small>
+						</section>
+						<section>
+							<small style="text-align: left;">
+								<p>Na potrzeby tej pracy wybrano następujące miary oceny systemów wbudowanych: </p>
+								<ul>
+									<li> osiągi, wydajność, </li>
+									<li> pobór mocy,</li>
+									<li> jednorazowy koszt projektowania,</li>
+									<li> możliwość wprowadzania zmian do systemu,</li>
+									<li> czas projektowania oraz produkcji.</li>
+								</ul>
+							</small>
+						</section>
+				</section>
+				<section>
+					<section>
+						<h2> Technologie wykorzystywane przy implementacji algorytmów przetwarzania obrazu </h2>
+						<small style="text-align: left;">
+							<p>W przetwarzaniu obrazów najbardziej popularne są dwie biblioteki ogólnego przeznaczenia:</p>
+							<ul>
+								<li> OpenCV,</li>
+								<li> Dlib. </li>
+							</ul>
+						</small>
+					</section>
+					<section>
+						<small style="text-align: left;">
+							<p>W pracy zdecydowano się na implementację algorytmów, które przetwarzają obraz zapisany w postaci tablicy jednowymiarowej. Nie przeprowadzano przetwarzania na obiektach biblioteki OpenCV, aby umożliwić implementowanym rozwiązaniom współpracę z jak największą ilością frameworków oraz ze względu na możliwość uzyskania krótszych czasów przetwarzania.</p>
+						</small>
+					</section>
+					<section>
+						<small style="text-align: left;">
+							<h3>Technologie programowania równoległego</h3>
+							<p>Coraz częściej stosuje się przetwarzanie równoległe. Spowodowane jest to większą dostępnością GPGPU, nawet na urządzenia małych rozmiarów, oraz dostępnością wielordzeniowych CPU umożliwiających przetwarzanie wielowątkowe.</p>
+							<p>Implementację algorytmów w tej pracy wykonano w dwóch technologiach wykorzystujących GPGPU:</p>
+							<ul>						
+								<li> OpenACC, </li>
+								<li> OpenCL. </li>
+							</ul>
+							<p>Dodatkowo dla implementacji wykorzystujących samo CPU zastosowano bibliotekę OpenMP.</p>
+						</small>
+					</section>
+					<section>
+						<h4>openMP</h4>
+						<small  style="text-align: left;">
+							<p>OpenMP to jednolite środowisko dyrektyw zrównoleglających dla maszyn z pamięcią wspólną. Standard
+								OpenMP obejmuje dyrektywy dla języków Fortran 90 oraz C/C++, a także towarzyszące im
+								elementy, jak bibliotekę procedur oraz zmienne środowiskowe. W przeciwieństwie do większości technologii dokonujących zrównoleglenia kodu do wykonywania na GPGPU, OpenMP jest dostępne dla większości znanych CPU różnych architektur. Można wykorzystywać je na wszystkich rozważanych w tej pracy platformach sprzętowych.</p>
+						</small>
+					</section>
+					<section>
+						<h4>openACC</h4>
+						<small  style="text-align: left;">
+							<p>Technologia OpenACC jest technologią podobną do OpenMP. Nawet sama w sobie wykorzystuje technologię OpenMP.
+								Jest to technologia, która pozwala na zrównoleglenie programu napisanego w wersji szeregowej w języku C/C++ lub fortran. W API tej technologii są dostępne dyrektywy, które pozwalają na zrównoleglenie danych regionów programu, w których obliczenia są możliwe do wykonania w sposób równoległy. Dyrektywy wskazują regiony programu, które można wykonywać równolegle. Kompilator generuje odpowiedni kod, który ma zostać wykonany na GPGPU. Jeżeli dany system wbudowany lub inny zbliżony do maszyny PC nie posiada GPGPU obsługującego technologię OpenACC, wtedy program wykorzystuje technologię OpenMP, aby wykonać zrównoleglony kod na CPU.</p>
+						</small>
+					</section>
+					<section>
+						<h4>openCL</h4>
+						<small  style="text-align: left;">
+							<p>OpenCL jest frameworkiem wspomagającym pisanie aplikacji na heterogenicznych platformach (używających różnego rodzaju jednostek obliczeniowych, np. CPU i GPU). Wspiera on GPGPU wielu firm czy nawet nie omawianych w tej pracy FPGA. 
+								Jest to technologia, która pozwala na dużą przenośność oprogramowania pomiędzy różnymi urządzeniami posiadającymi karty graficzne ogólnego przeznaczenia, niekoniecznie jednego dostawcy. Daną implementację można uruchomić na urządzeniu z GPGPU firmy NVIDIA oraz np. GPGPU firmy ARM.</p>
+						</small>
+					</section>
+					<!-- </section> -->
+				</section>
+				<section>
+					<section>
+						<h2>Przegląd istniejących metod detekcji twarzy</h2>
+						<small style="text-align: left;">
+							<p>W środowisku zajmującym się przetwarzaniem obrazu można spotkać się z dwoma rodzajami klasyfikacji metod detekcji twarzy:</p>
+							<ul>
+								<li>Podział ze względu na wybraną metodę detekcji twarzy.</li>
+								<li>Podział ze względu na metody wykorzystujące techniki klasyczne oraz metody używające sieci neuronowe.</li>
+							</ul>
+						</small>
+					</section>
+					<section>
+						<h3>Podział ze względu na wybraną metodę detekcji twarzy</h3>
+						<img class="my-diagram-style" src="image/methods.png" alt="methods">
+					</section>
+					<section>
+						<h3>Podział algorytmów detekcji twarzy</h3>
+						<small>
+						<p>Najczęściej można było się spotkać z następującym podziałem algorytmów detekcji twarzy:</p>
+							<ul>
+								<li>algorytmy działające na przestrzeni barw,</li>
+								<li>algorytmy działające w skali szarości.</li>
+							</ul>
+						</small>
+					</section>
+				</section>
+				<!-- <section>
+					<section>
+						<h2>Detekcja Twarzy</h2>
+						<p>Przez detekcję twarzy w tej pracy, rozumiane jest zadanie klasyfikacji binarnej, tzn. sprawdzanie czy w badanym obrazie lub jego części znajduje się twarz ludzka oraz wyznaczenie współrzędnych twarzy na obrazie. Takie podejście jest obecnie normą w tego typu zagadnieniach.
+
+							 Za twarz ludzką przyjęto twarz (specjalny przypadek twarzy ssaków), osób od wieku poniemowlęcego do dorosłego włącznie.</p>
+					</section>
+				</section>
+				<section>
+					<section>
+						<h3>Zastosowania</h3>
+						<ul>
+							<li>systemy ochrony </li>
+							<li>część systemu rozpoznawania twarzy</li>
+							<li>systemy śledzenia</li>
+							<li>filtry na portalach społecznościowych</li>
+							<li>video konferencje</li>
+							<li>inne niekonwencjonalne zastosowania /np. generacja zestawu klocków lego na podstawie wykrytej twarzy/</li>
+							</ul>
+					</section>
+				</section>
+				<section>
+					<section>
+						<h2>Najczęściej używane metody</h2>
+						<img class="my-diagram-style" src="image/methods.png" alt="methods">
+					</section>
+
+					
+				</section> -->
+				<section>
+					<section>
+						<h2>Kryteria wyboru algorytmów do dalszej analizy</h2>
+						<p> <small><a href=""> Złożoność algorytmu</a>, ze względu na charakter implementacji w systemach wbudowanych. Algorytmy zaimplementowane w urządzeniach wbudowanych charakteryzują się niewielką złożonością obliczeniową i prostotą </small></p>
+						<p> <small><a href=""> Udokumentowanie algorytmu</a>, im więcej informacji jest udostępnionych na temat algorytmu, tym bardziej ułatwiona jest jego implementacja np. rozwianie wątpliwości co do prawdziwości opisu kroku algorytmu, inne ujęcie, przedstawienie tego samego problemu czy ulepszenia danego algorytmu wprowadzone przez osoby trzecie.</small></p>
+						<p> <small><a href=""> Udostępnione narzędzia przez twórców algorytmu oraz osoby trzecie</a> np. implementacje algorytmów uczenia maszynowego wykorzystywanego przy testach algorytmu.</small></p>
+					</section>
+					<section>
+						<div style="text-align: left;">
+						<p> <small><a href=""> Najmniejszy koszt implementacji</small></p>
+						<p> <small><a href=""> Jak najkrótszy czas wykonywania; przetwarzanie w czasie rzeczywistym (ang.Real-time processing)</a> czas wykonywania algorytmu niewidoczny, nieodczuwalny dla procesu; tutaj dla pobierania kolejnej klatki kamery.</small></p>
+						<p> <small><a href=""> Niekomercyjność algorytmów (open-source)</a>, pozwala to na wykorzystywanie algorytmu we własnych celach komercyjnych</small></p>
+						</div>
+					</section>
+				</section>
+				<!-- <section>
+					<h3>Notacja duże-O</h3>
+					<small><p>Notacja dużego O – notacja przedstawiająca asymptotyczne tempo wzrostu, wykorzystywana do zapisywania złożoności obliczeniowej algorytmu. Za pomocą tej notacji zapisywany jest rząd wielkości funkcji wyrażającej liczbę operacji dominujących (w przypadku złożoności czasowej) lub rozmiar wymaganej pamięci (w przypadku złożoności pamięciowej) w zależności od liczby danych wejściowych.
+						Wykorzystując notację dużego O nie podajemy dokładnego wzoru funkcji, a jedynie jej najbardziej znaczący składnik, w dodatku z pominięciem stałego współczynnika.</p></small>
+				</section> -->
+				<section>
+					<section>
+						<h2>Opis systemu</h2>
+						<p> <small> W tej części prezentacji zostaną przedstawione wymagania dotyczące systemu wbudowanego stworzonego specjalnie do detekcji twarzy w obrazie.</small></p>
+						<p><small>We wstępnej fazie projektu sporządzono listę wymagań systemu w języku naturalnym, na podstawie, których wyznaczono wymagania funkcjonalnych i niefunkcjonalnych</small></p>
+						<p><small>Wymagania funkcjonalne zapisano w postaci przypadków użycia, które w koleinych etapach posłużą do wyznaczenia pracochłonności oraz kosztów wytworzenia oprogramowania</small></p>
+					</section>
+				
+				
+					<section>
+							<div class="">
+									<h2>Wymagania systemu</h2>
+									<div align="left">
+										<small>
+											SR1. Urządzenie pracuje od razu po uruchomieniu
+											<br><br>
+											SR2. System powinien być szybki
+											<br><br>
+											SR3. System wbudowany podpięty do urządzenia typu monitor lub innego urządzenia video wyświetla obraz z kamery wraz z zaznaczonymi na obrazie wykrytymi twarzami
+											<br><br>
+											SR4. Do urządzenia można się połączyć przez sieć
+											<br><br>
+											SR5. Po połączeniu z urządzeniem poprzez sieć używając przeglądarki internetowej,  owe urządzenie powinno wyświetlać obraz w przeglądarce
+											<br><br>
+											SR6. Urządzenie powinno prosić o autoryzację poprzez podanie hasła i nazwy użytkownika przy procesie łączenia się z urządzeniem.
+											<br><br>
+											SR7. System powinien być tak stworzony aby umożliwiać wprowadzenie nowych funkcji w przyszłości	np. wprowadzenie rozpoznawania twarzy, wieku, emocji osoby czy liczenia osób występujących na obrazie
+											<br><br>
+										</small>
+										</div>
+							</div>
+					</section>
+					<!-- <section>
+					</section> -->
+				
+				
+					<section>
+						<h2>Wymagania niefunkcjonalne</h2>
+						<p>Wymagania niefunkcjonalne to wszystkie wymagania nie związane z funkcjami widzianymi od strony użytkownika </p>
+						<p>Typy wymagań opisywane są przez standard ISO25010 </p>
+					</section>
+					<section>
+						<div>
+							<small>
+								<ul>
+									<li>Funkcjonalne dopasowanie (funkcjonalna kompletność, poprawność, np. jak dokładny ma być system w różnych kwestiach)</li>
+									<li>Wydajność (charakterystyka czasowa, zużycie zasobów, np. jak szybko mają być wyświetlani użytkownicy)</li>
+									<li>Kompatybilność (współistnienie w różnych środowiskach, np. z jakimi systemami operacyjnymi aplikacja będzie współpracować)</li>
+									<li>Użyteczność (łatwość korzystania, ochrona przed błędami, estetyka, np. jak długo zajmie nauka korzystania z oprogramowania)</li>
+									<li>Niezawodność (dostępność techniczna, odporność na wady, odtwarzalność, np. jak często dopuszczamy brak możliwości korzystania z serwisu)</li>
+									<li>Bezpieczeństwo (poufność, identyfikowalność, np. jak dokładnie będziemy zapamiętywać historię operacji w systemie)</li>
+									<li>Łatwość utrzymania (łatwość analizy, modyfikacji, testowania, np. jaka dokumentacja techniczna powinna być przygotowana)</li>
+									<li>Przenośność (łatwość adaptacji, instalacji, aktualizacji)</li>
+									</ul>
+							</small>
+						</div>
+					</section>
+
+					<section>
+						<small>
+							<div align="left">
+								NFR01 <br>
+								Opis: System detekcji twarzy musi działać z dokładnością nie mniejszą niż 70%. Dozwolony jest błąd rzędu ok 30%.<br>
+								Kategoria: Funkcjonalne dopasowanie<br>
+								Priorytet: Wysoki<br><br>
+							</div>
+							<div align="left">
+								NFR02<br>
+								Opis: System detekcji twarzy musi być szybki. Powinien nie spowalniać sekwencji wideo do mniej niż 7 klatek na sekundę. Czas wykonywania algorytmu nie może być dłuższy niż  0.143[s].<br>
+								Kategoria: Wydajność<br>
+								Priorytet: Wysoki<br><br>
+							</div>
+						</small>
+					</section>
+
+					<section>
+						<small>
+							<div align="left">
+								NFR03<br>
+								Opis: System wbudowany powinien być łatwo wymienialny oraz zastępowalny w przypadku awarii poprzez inny system wbudowany o takim samym zastosowaniu.<br>
+								Kategoria: Łatwość utrzymania<br>
+								Priorytet: Wysoki<br><br>
+							</div>
+							<div align="left">
+								NFR04
+								Opis: System powinien być tak stworzony aby umożliwiać wprowadzenie nowych funkcji w przyszłości np. wprowadzenie rozpoznawania twarzy, wieku, emocji osoby czy liczenia osób.<br>
+								Kategoria: Przenośność<br>
+								Priorytet: Wysoki<br><br>
+							</div>
+						</small>
+					</section>
+
+					<section>
+						<small>
+							<div align="left">
+								NFR05<br>
+								Opis: System wbudowany powinien być kompatybilny ze standardem USB<br>
+								Kategoria: Kompatybilność<br>
+								Priorytet: Wysoki<br><br>
+							</div>
+							<div align="left">
+								NFR06<br>
+								Opis: System wbudowany powinien być kompatybilny ze standardem HDMI w celu przesyłania obrazu.<br>
+								Kategoria: Kompatybilność<br>
+								Priorytet: Wysoki<br><br>
+							</div>
+						</small>
+					</section>
+
+					<section>
+						<small>
+							<div align="left">
+								NFR07<br>
+								Opis: System wbudowany powinien mieć możliwość łączenia się z siecią bezprzewodową w celu udostępniania obrazu<br>
+								Kategoria: Kompatybilność<br>
+								Priorytet: Niski<br><br>
+							</div>
+							<div align="left">
+								NFR08<br>
+								Opis: W przypadku posiadania możliwości do połączenia poprzez sieć, system wbudowany powinien udostępniać swoje zasoby poprzez autoryzację poprzez nazwę użytkownika i hasło.<br>
+								Kategoria: Bezpieczeństwo<br>
+								Priorytet: Niski<br><br>
+							</div>
+						</small>
+					</section>
+
+					<section>
+						<small>
+							<div align="left">
+								NFR09<br>
+								Opis: System nie powinien wymagać konfiguracji przez użytkownika. Powinien być gotowy od razu po uruchomieniu.<br>
+								Kategoria: Użyteczność<br>
+								Priorytet: Wysoki<br><br>
+							</div>
+							<div align="left">
+								NFR10<br>
+								Opis: System powinien posiadać oprogramowanie, które powinno być stworzone w taki sposób aby umożliwić przeniesienie go na inne urządzenie<br>
+								Kategoria: Przenośność<br>
+								Priorytet: średni<br><br>
+							</div>
+						</small>
+					</section>
+
+					<section>
+						<small>
+							<div align="left">
+								NFR11<br>
+								Opis: System powinien posiadać oprogramowanie, które powinno dać się łatwo zainstalować. Ilość konfiguracji samego urządzenia powinna być ograniczona do minimum.<br>
+								Kategoria: Przenośność<br>
+								Priorytet: Niski<br><br>
+							</div>
+							<div align="left">
+								NFR12<br>
+								Opis: Do systemu powinna być dostarczona instrukcja uruchomienia systemu wbudowanego oraz ewentualnego logowania się.<br>
+								Kategoria: Użyteczność<br>
+								Priorytet: Niski<br><br>
+							</div>
+						</small>
+					</section>
+				
+				
+					<section>
+						<h2>Aktorzy</h2>
+							Aktor jest osobą (lub dowolną inną jednostką), która w jakiś sposób wymienia informacje z systemem, choć pozostaje poza jego zakresem. Jest więc w szerokim znaczeniu użytkownikiem tego systemu, tzn. żąda od systemu wykonania pewnych funkcji i/lub odbiera efekty ich wykonania. Aktor opisuje rolę, a nie konkretną osobę lub jednostkę.<br><br>
+					</section>
+					<section>
+						<div class="" align="left">
+						W systemie wbudowanym tworzonym na potrzeby tej pracy wyosobniono następujących aktorów: <br><br>
+						<ul>
+							<li>Administrator, osoba fizyczna<br></li>
+							<li>Inny system wymieniający informację z naszym systemem wbudowanym <br></li>
+						</ul>
+						</div>
+					</section>
+
+					<section>
+						<h2>Wymagania funkcjonalne</h2>
+						<p>Wymagania funkcjonalne zapisano w postaci przypadków użycia (Use case)</p>
+						<p>Przypadek użycia jest opisem interakcji pomiędzy użytkownikiem, a systemem informatycznym. Mogą one występować w różnych formach.</p>
+
+						<p>Najprostsza to akapit tekstu pisany językiem naturalnym. Bardziej powszechna jest jednak postać strukturalna.</p>
+					</section>
+					<section>
+						<div align="left">
+							<small>
+								<p>UC1: Detekcja twarzy<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;Atrybuty:<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;G&#322;&oacute;wny aktor: System<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Priorytet :Wysoki<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;Główny scenariusz:<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1. Urządzenie pobiera obraz<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2. Urządzenie bada pobrany obraz pod względem występowania twarzy ludzkich <br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3. Urządzenie wyznacza współrzędne występowania twarzy na obrazie<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4. System oznacza na obrazie ewentualne znalezione twarze<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 5. System udostępnia obraz z ewentualnie oznaczonymi twarzami</p>
+							</small>
+						</div>
+					</section>
+					<section>
+						<div align="left">
+							<small>
+								<p>UC2: Włączenie systemu wbudowanego<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;Atrybuty:<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Główny aktor: Użytkownik<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Priorytet :Wysoki<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;Główny scenariusz:<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1. Użytkownik uruchamia system<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2. System bez dalszej ingerencji użytkownika uruchamia niezbędne moduły do samodzielnego działania<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3. System jest od razu jest gotowy do użycia</p>
+							</small>
+						</div>
+					</section>
+					<section>
+						<div align="left">
+							<small>
+								<p>SUB1: Logowanie do urządzenia wbudowanego<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;Atrybuty:<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Główny aktor: Użytkownik, zewnętrzny system<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Priorytet :Średni<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;Główny scenariusz:<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1. Użytkownik podaje nazwę użytkownika oraz hasło<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2. Użytkownik zatwierdza wpisane przez siebie dane<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3. System zezwala użytkownikowi na logowanie<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4. Aktor uzyskuje dostęp do funkcji systemu <br />
+									&nbsp;&nbsp;&nbsp;&nbsp;Rozszerzenia:<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2.A. Użytkownik nie podał żadnych danych<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2.A.1 Powrót do pkt 1.<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2.B. Użytkownik podał błędne dane<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2.B.1 Powrót do pkt 1.</p>
+							</small>
+						</div>
+					</section>
+					<section>
+						<div align="left">
+							<small>
+								<p>SUB2: Wylogowywanie się z urządzenia<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;Atrybuty:<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Główny aktor: Użytkownik, zewnętrzny system<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Priorytet :Średni<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;Główny scenariusz:<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1. Użytkownik uruchamia moduł wylogowywania się z systemu<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2. System wyświetla komunikat o wylogowaniu<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;Rozszerzenia:<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.A. Użytkownik zamyka interfejs systemu bez wylogowywania się<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1.A.1 Urządzenie automatycznie uruchamia moduł wylogowywania użytkownika</p>
+							</small>
+						</div>
+					</section>
+					<section>
+						<div align="left">
+							<small>
+								<p>UC3: Łączenie się z systemem wbudowanym <br />
+									&nbsp;&nbsp;&nbsp;&nbsp;Atrybuty:<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Główny aktor: Użytkownik, zewnętrzny system<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Priorytet :Średni<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;Główny scenariusz:<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1. Aktor wywołuje moduł logowania się do urządzenia<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2. Logowanie do systemu - przypadek użycia SUB1<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3. Urządzenie udostępnia obraz wraz z zaznaczonymi znalezionymi twarzami dla zalogowanego aktora</p>
+							</small>
+						</div>
+					</section>
+					<section>
+						<div align="left">
+							<small>
+								<p>UC4: Podłączenie do monitora<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;Atrybuty:<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Główny aktor: Użytkownik<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Priorytet :Wysoki<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;Główny scenariusz:<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1. Użytkownik podłącza system wbudowany do urządzenia <br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; elektronicznego przeznaczonego do zdalnego odbioru ruchomego obrazu (np. Monitor, telewizor, inny ekran)<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2. Urządzenie wyświetla obraz wraz z zaznaczonymi znalezionymi twarzami na ekranie</p>
+							</small>
+						</div>
+					</section>
+					<section>
+						<div align="left">
+							<small>
+								<p>UC5: Pobranie obrazu<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;Atrybuty:<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Główny aktor: System<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Priorytet :Wysoki<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;Główny scenariusz:<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1. System łączy się z kamerą<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2. System uruchamia moduł pobierania klatek z kamery<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3. System pobiera klatkę obrazu z kamery<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4. System konwertuje pobraną klatkę do formatu dogodnego do dalszego przetwarzania<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;Rozszerzenia:<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1.A Urządzenie nie może połączyć się z kamerą<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1.A.1 Urządzenie oczekuje na połączenie z kamerą, powrót do kroku 1.</p>
+							</small>
+						</div>
+					</section>
+					<section>
+						<div align="left">
+							<small>
+								<p>UC6: Badanie obrazu<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;Atrybuty:<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Główny aktor: System<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Priorytet :Wysoki<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;Główny scenariusz:<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1. System uruchamia moduł detekcji twarzy.<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2. System bada pobrany obraz pod względem występowania twarzy<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3. System zwraca współrzędne znalezionych twarzy oraz ich rozmiar<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;Rozszerzenia:<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3.A System nie wykrył żadnej twarzy<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3.A.1 Moduł nic nie zwraca</p>
+							</small>
+						</div>
+					</section>
+					<section>
+						<div align="left">
+							<small>
+								<p>UC7: Oznaczanie twarzy na obrazie<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;Atrybuty:<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Główny aktor: System<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Priorytet :Wysoki<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;Główny scenariusz:<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1. System sprawdza czy otrzymał wykryte twarze do oznaczenia<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2. System uruchamia moduł oznaczania wykrytych twarzy na obrazie.<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3. System oznacza wykryte twarze na obrazie<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4. System zwraca obraz z oznaczonymi twarzami<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;Rozszerzenia:<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1.A Moduł oznaczania nie otrzymał żadnych danych dotyczących twarzy<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1.A.1 System zwraca obraz bez wyznaczony twarzy<br />
+									 <br />
+									</p>
+							</small>
+						</div>
+					</section>
+					<section>
+						<div align="left">
+							<small>
+								<p>UC8: Udostępnienie obrazu z oznaczonymi twarzami na ekranie<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;Atrybuty:<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Główny aktor: System<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Priorytet :Wysoki<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;Główny scenariusz:<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1. System uruchamia moduł do wyświetlania obrazu<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2. System przygotowuję obraz do udostępnienia <br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3. System udostępnia obraz <br />
+									&nbsp;&nbsp;&nbsp;&nbsp;Rozszerzenia:<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1.A System nie wykrył dostępnego urządzenia do udostępniania obrazu<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1.A.1 System oczekuje na podłączenie ekranu, powrót do pkt. 1</p>
+							</small>
+						</div>
+					</section>
+					<section>
+						<div align="left">
+							<small>
+								<p>UC9: Udostępnienie obrazu z oznaczonymi twarzami poprzez sieć<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;Atrybuty:<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Główny aktor: System<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Priorytet :średni<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;Główny scenariusz:<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1. System uruchamia moduł do udostępniania obrazu za pomocą sieci<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2. System przygotowuję obraz do udostępnienia<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3. System udostępnia obraz <br />
+									&nbsp;&nbsp;&nbsp;&nbsp;Rozszerzenia:<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1.A System nie uzyskał dostępu do sieci <br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1.A.1 System oczekuje na dostęp do sieci, powrót do pkt. 1<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1.B System nie wykrył dostępnego urządzenia do udostępniania obrazu<br />
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1.B.1 System oczekuje na podłączenie ekranu, powrót do pkt. 1</p>
+
+								</small>
+						</div>
+					</section>
+				</section>
+			</section>
+				<!-- <section>
+					<section>
+						<h2>Viola-Jones</h2>
+
+					</section>
+				</section> -->
+				<section>
+					<section>
+						<h2>Szacowanie pracochłonności</h2>
+						Do szacowania pracochłonności wybrano metodę Use Case Points, ponieważ pozwala ona oszacować pracochłonność projektu na wczesnym etapie projektu (definiowania przypadków użycia)
+					</section>
+					<section>
+						W metodzie Use Case Points podstawowymi artefaktami branymi pod uwagę są:<br><br>
+						Czynniki złożoności środowiska – opisujące w dużej mierze organizację, która
+						wytwarza oprogramowanie <br>
+						Czynniki złożoności technicznej – opisujące własności produktu,<br>
+						Aktorzy <br>
+						Oraz Przypadki użycia (kroki - transakcje) <br>
+					</section>
+
+					<section>
+
+							Czynniki złożoności środowiska (ang. Environmental Complexity Factors) charakteryzuj
+							zespół/organizacje, która wytwarza oprogramowanie. <br>
+							Wyszczególniono 8 czynników złożoności środowiska. Każdemu z nich przydzielono także wagą
+							liczbową. Im waga większa tym czynnik bardziej wpływa na zmniejszenie pracochłonności
+							przedsięwzięcia.
+
+					</section>
+					<section>
+						<small>
+							<ul>
+								<li>E1 - Zaznajomienie z projektem ( waga 1,5 ) – określa czy zespół jest zaznajomiony z dziedzin problemu i technicznymi aspektami realizowanego projektu. Brane jest tu takie pod uwagę zaznajomienie zespołu z metodyk , w ramach której realizowany jest projekt .</li>
+								<li>E2 - Doświadczenie w tworzeniu aplikacji ( waga 0,5 ) – ogólnie rozumiane doświadczenie zespołu w wytwarzaniu oprogramowania .</li>
+								<li>E3 - Doświadczenie w projektowaniu aplikacji zorientowanych obiektowo ( waga 1,0 ) – określa umiejętność projektowania aplikacji obiektowych , jak i wykorzystanie narzędzi do projektowania, takich jak na przykład język UML.</li>
+								<li>E4 – Umiejętności głównego analityka ( waga 0,5 ) – czyli , jego zdolność do pozyskiwania wymaga od klienta oraz zaznajomienie z wiedzą dziedzinową .</li>
+								<li>E5 - Motywacja ( waga 1,0 )</li>
+								<li>E6 - Stabilność wymaga ( waga 2,0 ) – bardzo istotny czynnik , określa czy wymagania nie są narażone na częste zmiany .</li>
+								<li>E7 - Pracownicy pracujący w niepełnym wymiarze ( waga - 1 ) – określa , czy wśród zespołu znajduje się duża liczba pracowników pracujących w niepełnym wymiarze godzin ( na przykład studentów )</li>
+								<li>E8 - Trudność języka programowania ( waga - 1 ) – określa jak trudny do opanowania jest język programowania , w którym implementowany będzie system .</li>
+								</ul>
+						</small>
+					</section>
+					<section>
+						<h3>Czynnik złożoności środowiska ECF</h3>
+						<div class="container">
+							<small>
+							Aby wyznaczyć czynnik złożoności środowiska (ang. Environmental Complexity Factor, ECF),
+							należy: <br><br>
+							<div class="container" align="left">
+								<ul>
+									<li>Określić wpływ każdego z ośmiu czynników złożoności środowiska w skali od 0 do 5 </li>
+									<li>Wyliczyć wartości ECF korzystając z podanego wzoru</li>
+								</ul>
+							</div>
+							<img class="my-diagram-style" src="image/23.png" alt=""> <br>
+							gdzie,<br>
+							<img class="my-diagram-style" src="image/24.png" alt="">
+							</small>
+						</div>
+					</section>
+					<section>
+						Czynniki złożoności technicznej określaj pewne aspekty tworzonego produktu.
+						Zdefiniowano aż 13 takich czynników. Podobnie jak czynniki środowiskowe,
+						każdemu z nich przypisano waga oddająca stopie w jakim czynnik wpływa na
+						kocowe oszacowanie. <br><br>
+						Wzrost wpływu danego współczynnika złożoności technicznej powoduje zawsze
+						wzrost kocowego oszacowania pracochłonności.
+					</section>
+					<section>
+						<div>
+							<small>
+								<ul>
+									<li>T1 – System rozproszony ( waga 2,0 ) – definiuje czy w systemie wymagane jest rozproszone przetwarzanie danych .</li>
+									<li>T2 - Wydajność ( waga 1,0 ) – określa Wydajność systemu , w odniesieniu do czasu odpowiedzi systemu , szybkości przetwarzania .</li>
+									<li>T3 – Wydajność dla użytkownika kocowego ( waga 1,0 ) – określa istotność wydajności dla kocowego użytkownika , w kontekście jego percepcji .</li>
+									<li>T4 – Złożone przetwarzanie wewnętrzne ( waga 1,0 ) – określa czy wymagane są skomplikowane operacje przetwarzania danych , użycie zaawansowanych algorytmów.</li>
+									<li>T5 – Re-używalność ( waga 1,0 ) – określa czy kod tworzonej aplikacji , będzie w przyszłości wykorzystywany w podobnych projektach .</li>
+									<li>T6 – Łatwość w instalacji ( waga 0,5 ) – określa sposób instalacji . Czy aplikacja musi być zainstalowana przez specjalistów z firmy wytwarzającej oprogramowanie, czy tez posiadać będzie przyjazny i łatwy w obsłudze instalator .</li>
+									<li>T7 – Łatwość użycia ( waga 0,5 ) – określa dostosowanie interfejsu użytkownika do jego potrzeb , wygodą w korzystaniu oraz Łatwość uczenia .</li>
+									<li>T8 - Przenośność ( waga 2,0 ) – czy aplikacja powinna działać w różnych środowiskach .</li>
+									</ul>
+							</small>
+						</div>
+					</section>
+					<section>
+						<div>
+							<small>
+								<ul>
+									<li>T9 – Łatwość wprowadzania zmian ( waga 1,0 ) – określa czy klient będzie chciał w przyszłości rozbudowywać system . Jeśli tak wymusza to stworzenie odpowiedniej architektury .</li>
+									<li>T10 - Współbieżność ( waga 1,0 ) – czy w aplikacji będzie miało miejsce przetwarzanie współbieżne .</li>
+									<li>T11 – Specjalne zabezpieczenia ( waga 1,0 ) – określa czy system będzie wymagał wykorzystanie dodatkowych mechanizmów zabezpieczeń .</li>
+									<li>T12 – Zależność od zewnętrznych bibliotek ( waga 1,0 ) – w jakim stopniu system bazuje na zewnętrznych bibliotekach . Oczywiście wykorzystanie bibliotek zmniejsza liczb funkcji , które należy zaimplementować, jednak niesie za sobą pewne problemy z utrzymaniem zgodności , czy też rozbudowy funkcji przez nie udostępniane</li>
+									<li>T13 – Dodatkowe szkolenia użytkowników ( waga 1,0 ) – czy będą wymagane dodatkowe szkolenia użytkowników , czy też wystarczy stworzona dokumentacja .</li>
+									</ul>
+							</small>
+						</div>
+					</section>
+					<section>
+						<h3>czynnik złożoności technicznej TCF</h3>
+						<div class="">
+							<small>
+								<div class="">
+									<ul>
+										<li>czynnik złożoności technicznej (ang . Technical Complexity Factor),
+												w skrócie TCF, należy określić wpływ każdego z trzynastu czynników złożoności
+												technicznej w skali od 0 do 5.</li>
+										<li>Wyliczenie wartości TCF korzystając z podanego wzoru</li>
+									</ul>
+								</div>
+							</small>
+							<img class="my-diagram-style" src="image/25.png" alt=""> <br>
+							gdzie,<br>
+							<img class="my-diagram-style" src="image/24.png" alt="">
+						</div>
+					</section>
+					<section>
+						<h3>Złożoność aktora</h3>
+						<!-- <small> -->
+						<ul>
+							<li>Aktor o złożoności prostej który komunikuje się z systemem przez API</li>
+							<li>Aktor o złożoności średniej, który komunikuje się z systemem poprzez protokół (np.HTTP, FTP) lub stanowi źródło danych (pliki, baza danych)</li>
+							<li>Aktor złożony, komunikujący się z systemem poprzez graficzny interfejs użytkownika</li>
+						</ul>
+						<!-- </small> -->
+					</section>
+					<section>
+						<h3>Niedostosowana waga aktorów UAW</h3>
+						<p>Wyliczenie niedostosowanej wagi aktorów (ang. Unadjusted Actors Weight):</p>
+						<small>
+							<div class="container">
+								<div class="row">
+									<div class="col-lg-6 col-md-12">
+										<ul>
+											<li>Zliczanie liczby aktorów zakwalifikowanych do poszczególnych grup</li>
+											<li>Wymnażanie liczności przez odpowiednie współczynnik złożoności dla każdej z grup
+												<ul>
+													<li>Aktor prosty 1</li>
+													<li>Aktor średni 2</li>
+													<li>Aktor złożony 3</li>
+												</ul>
+											</li>
+											<li>Wyliczenie wartości TCF korzystając z podanego wzoru</li>
+										</ul>
+									</div>
+									<div class="col-lg-6 col-md-12 my-style-uaw">
+										<img class="my-diagram-style" src="image/26.png" alt=""> <br>
+										gdzie,<br>
+										<img class="my-diagram-style" src="image/27.png" alt="">
+									</div>
+								</div>
+							</div>
+						</small>
+					</section>
+
+					<section>
+						<h3>Wagi przypadków użycia UUCW</h3>
+						<p>Wyliczenie wagi przypadków użycia (ang. Unadjusted Use Cases Weight, UUCW):</p>
+						<small>
+							<div class="container">
+								<div class="row">
+									<div class="col-lg-6 col-md-12">
+										<ul>
+											<li>Wyznaczenie liczby transakcji w ramach przypadku użycia</li>
+											<li>W zależności od liczby transakcji możemy zakwalifikować dany przypadek użycia do jednej z trzech grup złożoności:
+												<ul>
+													<li>Proste – jeżeli mają 3 lub mniej transakcji - współczynnik złożoności 5</li>
+													<li>Średnie – liczba transakcji od 4 do 7 - współczynnik złożoności 10</li>
+													<li>Złożone – powyżej 7 transakcji  - współczynnik złożoności 15</li>
+												</ul>
+											</li>
+											<li>Wyliczenie wartości UUCW korzystając z podanego wzoru:</li>
+										</ul>
+									</div>
+									<div class="col-lg-6 col-md-12 my-style-uaw">
+										<img class="my-diagram-style" src="image/28.png" alt=""> <br>
+										gdzie,<br>
+										<img class="my-diagram-style" src="image/29.png" alt="">
+									</div>
+								</div>
+							</div>
+						</small>
+					</section>
+
+					<section>
+							<p>Do wyznaczania UUCW brane są tylko pod uwagę przypadki użycia poziomu user goals</p>
+							<img class="my-diagram-style" src="image/usecaseLevels.png" alt=""> <br>
+							<!-- https://www.wikiwand.com/en/Use_case -->
+							<!-- https://www.w3computing.com/systemsanalysis/use-case-levels/ -->
+							<!-- https://www.mountaingoatsoftware.com/articles/estimating-with-use-case-points -->
+					</section>
+
+
+					<section>
+						<p>Obliczenie niedostosowanych punktów przypadków użycia (ang. Unadjusted Use Case Points, UUCP):</p>
+						<img class="my-diagram-style" src="image/30.png" alt="">
+						<p>Obliczenie punktów przypadków użycia (ang. Unadjusted Use Case Points, UUCP):</p>
+						<img class="my-diagram-style" src="image/31.png" alt="">
+					</section>
+
+					<section>
+							<p>Przeliczenie UCP na pracochłonność [roboczogodziny]</p>
+							<p><b>pracochłonność=UCP*PF</b></p>
+							gdzie,<br>
+							<img class="my-diagram-style" src="image/32.png" alt="">,<br>
+							Istnieją różne metody wyznaczania PF, w projekcie przyjęto metodę wyznaczania PF na podstawie wpływu czynników środowiskowych
+							<!-- Autor metody proponuje <b>PF=20</b> -->
+							<!-- https://www.wikiwand.com/en/Use_case -->
+							<!-- https://www.w3computing.com/systemsanalysis/use-case-levels/ -->
+							<!-- https://www.mountaingoatsoftware.com/articles/estimating-with-use-case-points -->
+					</section>
+					<section>
+						<h5>Szacowanie pracochłonności systemu wbudowanego detekcji twarzy</h5>
+						<div class="container">
+							<div class="row">
+								<div class="col-lg-6 col-sm-12">
+									<img class="my-diagram-style my-table-big" src="image/Ttable.png" alt="">
+								</div>
+								<div class="col-lg-6 col-sm-12">
+									<img class="my-diagram-style my-table-big" src="image/Etable.png" alt="">
+									<img class="my-diagram-style my-table-small" src="image/Tab3.png" alt="">
+									<img class="my-diagram-style my-table-small" src="image/UUCPTable.png" alt="">
+								</div>
+							</div>
+	
+	
+							<!-- <img class="my-diagram-style my-table-big" src="image/Etable.png" alt="">
+							<img class="my-diagram-style my-table-small" src="image/Tab3.png" alt="">
+							<img class="my-diagram-style my-table-small" src="image/UUCPTable.png" alt=""> -->
+							<img class="my-diagram-style my-table-effort" src="image/Pracochlonnosc.png" alt="">
+						</div>
+					</section>
+				</section>
+
+				<section>
+					<section>
+						<h2>Wybrane algorytmy</h2>
+						<small>
+							<p>	Na potrzeby pracy rozpatrzono wiele różnych rodzajów algorytmów detekcji twarzy, m.in.</p>
+								<ul>
+									<li>Real Time Face Detection And Tracking For Mobile Videoconferencing </li>
+									<li>Viola-Jones</li>
+									<li>A Statistical Learning of Multi-View Face Detection</li>
+									<li>MobileNetV2+SSDLite</li>
+									<li>Robust Object Detection Via SoftCascade</li>
+									<li>Faced</li>
+									<li>Mask R-CNN</li>
+									<li>A Low Cost FPGA System for High Speed Face Detection and Tracking</li>
+									<li>A New Robust Face Detection Method Based on Corner Points</li>
+									<li>i inne</li>
+								</ul>
+						<!-- <div align="left"> -->
+						
+								<p> Do implementacji wybrano następujące algorytmy:</p>
+								<ul>
+									<li>A FAST AND ACCURATE UNCONSTRAINED FACE DETECTOR<br></li>
+									<li>MOBILENETV3<br></li>
+									<li>WŁASNE ROZWIĄZANIE<br></li>
+								</ul>
+							
+						<!-- </div> -->
+						</small>
+					</section>
+				</section>
+				<section>
+					<section>
+
+						<!-- <h2>A FAST AND ACCURATE UNCONSTRAINED FACE DETECTOR</h2> -->
+						<div class="container">
+							<div class="row">
+								<div class="col-lg-6 col-md-6 col-sm-1">
+									<h3>A FAST AND ACCURATE UNCONSTRAINED FACE DETECTOR</h3>
+								</div>
+								<div class="col-lg-6 col-md-6 col-sm-1">
+									<img class="my-diagram-style" src="image/Softcascade.png" alt="Softcascade">
+									<small><p> Złożoność obliczeniowa algorytmu: O(n^4)</p></small>
+								</div>
+							</div>
+
+						</div>
+					</section>
+					<section>
+						<div class="container">
+							<div class="row">
+								<div class="col-lg-12 col-md-12 col-sm-12" >
+									<h4>Konwersja na monochromatyczną przestrzeń barw</h4>
+									<img class="my-diagram-style" src="image/11.png" width="600" height="40" alt="eq">
+									<div align="left">
+										<small>
+										<p>Gdzie,<br />
+											B(u,v)_RGB - piksel we współrzędnych obrazu (u,v) w składowej niebieskiej z przestrzeni barw RGB<br />
+											G(u,v)_RGB - piksel we współrzędnych obrazu(u,v) w składowej zielonej z przestrzeni barw RGB<br />
+											R(u,v)_RGB - piksel we współrzędnych obrazu (u,v) w składowej czerwonej z przestrzeni barw RGB<br />
+											Y(u,v)_Luminance - wartość piksela we współrzędnych obrazu (u,v) w przestrzeni barw monochromatycznej</p>
+										</small>
+									</div>
+								</div>
+							</div>
+
+						</div>
+					</section>
+					<section>
+						<div class="container">
+							<h4>Miękka kaskada</h4>
+							<div class="row">
+								<div class="col-lg-6 col-md-12 col-sm-12" >
+									<img class="my-diagram-style" src="image/miekkakaskada.png" alt="eq">
+									<!-- <img class="my-diagram-style" src="image/13.png" alt="eq"> -->
+								</div>
+								<div class="col-lg-6 col-md-12 col-sm-12" >
+									<!-- <img class="my-diagram-style" src="image/11.png" width="600" height="30" alt="eq"> -->
+									<img class="my-diagram-style" src="image/miekka1.png" width="120" height="60" alt="eq">
+									<img class="my-diagram-style" src="image/miekka2.png"  alt="eq">
+									<small>
+										Zamiast wielu krótszych silnych klasyfikatorów (jak w Viola-Jones) skonstruowano jeden bardzo długi silny klasyfikator, którego kolejne człony (słabe klasyfikatory) są liczone w kolejnych iteracjach.
+									</small>
+								</div>
+							<!-- <img class="my-diagram-style" src="image/13.png" alt="eq"> -->
+						</div>
+					</section>
+					<section>
+						<h4>Znormalizowana różnica pikseli</h4>
+						<div class="container">
+							<small>
+									<img class="my-diagram-style" src="image/21.png" width="550" height="100" alt="eq">
+									<p> gdzie, </p>
+									<img class="my-diagram-style" src="image/16.png"  width="200" height="40" alt="eq">
+									<img class="my-diagram-style" src="image/15.png"  width="200" height="40" alt="eq">
+									<img class="my-diagram-style" src="image/20.png"  width="200" height="40" alt="eq">
+									<img class="my-diagram-style" src="image/14.png"  width="200" height="40" alt="eq">
+
+						</small>
+						</div>
+					</section>
+					<section>
+						<h4>Drzewa kwadratowe</h4>
+						<div class="container">
+							<small>
+								Deep Quadric Tree classifier polega na sprawdzaniu warunków i zależnie od nich daje odpowiedź. Warunki w tym klasyfikatorze mogły być połączone kaskadowo (po sprawdzeniu jednego warunku algorytm przechodził do kolejnego) lub być od razu wyjściem klasyfikatora.
+								<br><br>
+								Tree classifier składa się z węzłów (nodes) i liści (leaves)
+								<br><br>
+								<div class="container">
+									<div class="row justify-content-lg-center">
+										<img class="my-diagram-style" src="image/12.png" alt="eq">
+									</div>
+								</div>
+
+							</small>
+						</div>
+					</section>
+
+					<section>
+						<h5>Viola-Jones vs A fast and accurate unconstrained face detector</h5>
+						<div class="row">
+							<div class="col-lg-6 col-md-12">
+								<img class="my-diagram-style my-mobile-image-style" src="image/2VJ.png" alt="eq">
+								<small><p>Wynik algorytmu <em><b>Viola-Jones</b></em>, opencv</p></small>
+							</div>
+							<div class="col-lg-6 col-md-12">
+								<img class="my-diagram-style my-mobile-image-style" src="image/2UFD.png" alt="eq">
+								<small><p>Wynik algorytmu <em><b>A fast and accurate unconstrained face detector</b></em>, własna implementacja w języku C++</p></small>
+							</div>
+						</div>
+					</section>
+
+					<section>
+						<h5>Viola-Jones vs A fast and accurate unconstrained face detector</h5>
+						<div class="row">
+							<div class="col-lg-6 col-md-12">
+								<img class="my-diagram-style my-mobile-image-style" src="image/1VJ.png" alt="eq">
+								<small><p>Wynik algorytmu <em><b>Viola-Jones</b></em>, opencv</p></small>
+							</div>
+							<div class="col-lg-6 col-md-12">
+								<img class="my-diagram-style my-mobile-image-style" src="image/1UFD.png" alt="eq">
+								<small><p>Wynik algorytmu <em><b>A fast and accurate unconstrained face detector</b></em>, własna implementacja w języku C++</p></small>
+							</div>
+						</div>
+					</section>
+
+					<section>
+						<h4>Viola-Jones vs A fast and accurate unconstrained face detector</h4>
+						<div class="row">
+							<div class="col-lg-6 col-md-12">
+								<img class="my-diagram-style my-mobile-image-style my-vs-image-style" src="image/3VJ.png" alt="eq">
+								<small><p>Wynik algorytmu <em><b>Viola-Jones</b></em>, opencv</p></small>
+							</div>
+							<div class="col-lg-6 col-md-12">
+								<img class="my-diagram-style my-mobile-image-style my-vs-image-style" src="image/3UFD.png" alt="eq">
+								<small><p>Wynik algorytmu <em><b>A fast and accurate unconstrained face detector</b></em>, własna implementacja w języku C++</p></small>
+							</div>
+						</div>
+					</section>
+					<section>
+						<h4>Badania możliwości zrównoleglenia algorytmu</h4>
+						<small>
+							<p>W pracy tej tylko ten algorytm zostanie poddany badaniom ewentualnego zrównoleglenia, ponieważ kolejne rozpatrywane algorytmy są projektowane już od razu specjalnie pod kątem obliczeń równoległych.Zdecydowano się poddać ten algorytm takim badaniom ze względu na to, że koncepcja miękkiej kaskady posiada znaczną część obliczeń wykonywanych szeregowo, a autorzy algorytmu nic nie wspominali o tym w swoim artykule.</p>
+						</small>
+					</section>
+					<section>
+						<small>
+							<ul>
+								<li>p– liczba procesorów,</li>
+								<li>T(n; p)– czas wykonania programu realizującego ten sam algorytm dla zadania o wielkości n na maszynie z p procesorami; zakładamy, że algorytm został zaimplementowany w sposób optymalny, tzn. dla wszystkich par(n; p)czas ten jest najkrótszy z możliwych,</li>
+								<li>Beta(n; p)– udział czasu wykonania części sekwencyjnej w programie o wielkości n realizowanym na maszynie z p procesorami w całym czasie rzeczywistym (zegarowym) wykonania programu T(n; p); część sekwencyjna nie musi być spójna – może się składać z wielu fragmentów, między którymi jest część dająca się zrównoleglić (ten model obliczeń nosi nazwę rozwidlenie-połączenie, (ang.fork-join)</li>
+								<li>S(n; p)- współczynnik przyśpieszenia (ang.speed-up) zadania o wielkości n – dzięki zrównolegleniu na p procesorów</li>
+								<li>S%(n; p)- wydajność to współczynnik przyśpieszenia podawany w wersji przeskalowane jw. stosunku do przyśpieszenia idealnego</li>
+							</ul>
+						</small>
+					</section>
+					<section>
+						<h4>Wyniki pomiarów</h4>
+						<div class="row">
+							<!-- <div class="col-lg-6 col-md-12"> -->
+								<img class="" src="image/przyspieszenieTabela.png" width="100%" alt="eq">
+							<!-- </div> -->
+						</div>
+					</section>
+				</section>
+
+				<section>
+					<section>
+						
+						<div class="row">
+							<div class="col-lg-6 col-md-12">
+								<h2 style="margin-top: 60%;">MOBILENETV3</h2>
+							</div>
+							<div class="col-lg-6 col-md-12">
+								<img class=".my-chart-block" style="width: 70% !important; height: auto !important; margin:0 !important ;" src="image/mbnv3s.png" alt="eq">
+								<small class=".my-chart-block " style="margin:0 !important ;"><p class=".my-chart-block"  style="margin:0 !important ;">Architektura sieci mobilenetV3-small</p></small>
+								<img class=".my-chart-block" style="width: 65% !important; height: auto !important; margin:-1% 0 0 !important ;" src="image/mbnv3l.png" alt="eq">
+								<small class=".my-chart-block" style="margin:0 !important ;"><p class=".my-chart-block" style="margin:0 !important ;">Architektura sieci mobilenetV3-large</p></small>
+							</div>						
+						</div>
+					</section>
+					<section>
+						<small>
+						<p>MobileNet to sieć neuronowa autorstwa Google, o małych rozmiarach, małym opóźnieniu oraz niskich poborach zasobów (np. takich jak pobór mocy). Została stworzona w taki sposób, aby można było jej używać w urządzeniach o ograniczonych zasobach (embedded czy urządzenia mobilne).</p>
+						</small>
+					</section>
+					<section>
+						<h4>SSD</h4>
+						<small>
+								<p>
+									Single Shot Multiscale Detection network (SSD) to sieć neuronowa pozwalająca na wykona-nie zadania detekcji obiektów w różnych skalach i położeniach w obrazie podczas pojedynczej analizy danego obrazu. SSD odpowiada za wyznaczenie klasy oraz lokalizacji obiektu w obrazie w różnych skalach (wybranych odgórnie przy uczeniu modelu) dla podanych cech.SSD jako ekstraktor cech wykorzystuje inną sieć neuronową. Na podstawie wyników z innej sieci neuronowej, gdzie cechy są pobierane z wyników różnych warstw na różnych etapach wyznaczania odpowiedzi sieci, SSD decyduje o ewentualnych detekcjach w badanym obrazie.
+								</p>
+						</small>
+					</section>
+					<section>
+						<h4>SSDLite</h4>
+						<small>
+								<p>
+									Modyfikacja SSD, mająca na celu zmniejszenie złożoności obliczeniowej, jest to jak twierdzą sami autorzy ”mobile friendly version of regular SSD”. W stosunku do podstawowej wersji SSD tradycyjne operacje splotowe zastąpiono DWC ze splotem 1 × 1 (1 × 1 projection) przetwarzającym wyjście operacji DWC (opisanej w dalszej części pracy).
+								</p>
+						</small>
+					</section>
+					<section>
+						<h4>Modyfikacje wprowadzone w sieciach z rodziny MOBILENET w celu redukcji liczby obliczeń</h4>
+						<small>
+							<ul>	
+								<li>Splot rozdzielany w głąb (ang.Depth wise separable convolution, DSC) </li>
+								<li>Warstwa ’linear bottlenecks’</li>
+								<li>Odwrócone residua</li>
+								<li>Funkcja aktywacji h-swish</li>
+								<li>Moduł ’squeeze and excitation’</li>
+							</ul>
+						</small>
+					</section>
+					<section>
+						<h4>Uczenie modelu</h4>
+						<small>
+							<p>
+								Model sieci MobileNetV3 nie był przygotowywany do detekcji twarzy. Dostępne jej modele były przystosowane do detekcji wielu obiektów, w których, w śród nich nie występowała twarz ludzka.W celu zastosowania sieci MobileNetV3 w realizowanym systemie detekcji twarzy należało dokonać jej trenowania dla potrzeb tego systemu, w szczególności detekcji jednego typu obiektu(w tym przypadku twarzy). Podczas pisania pracy nie spotkano się z tym, aby ktoś podjął się oficjalnie zadania przystosowania MobileNetV3 do detekcji twarzy.Do uczenia modelu sieci neuronowej wykorzystano framework TensorFlow v1.15. Skorzy-stano z wersji 1.15, ponieważ zapewnia on łatwą możliwość uczenia własnego modelu (ObjectDetection API) stworzenia własnego detektora obiektów opartego na wybranej architekturze sieci neuronowej. W nowszej wersji ta funkcjonalność nie jest jeszcze dostępna.
+							</p>
+						</small>
+					</section>
+					<section>
+						<h4>Parametry uczenia</h4>
+						<small>
+							<ul>
+								<li>BatchSize= 24 - rozmiar wsadu uczącego (ang.Batch size), liczba przykładów użytych do pojedynczej aktualizacji gradientu,</li>
+								<li>sync_replicas=false - użycie treningu synchronicznego, w tym przypadku gradienty będą aktualizowane asynchronicznie,</li>
+								<li>startup_delay_steps= 0- ilość kroków, które należy odczekać przed rozpoczęciem procesu uczenia,</li>
+								<li>replicas_to_aggregate= 32 - ilość replik branych pod uwagę przy agregacji dla każdej aktualizacji wartości zmiennej,</li>
+								<li>learning_rate_base= 0:4 - bazowa wartość współczynniku uczenia (ang.learning rate),</li>
+								<li>warmup_steps= 2000 - długość stadia rozruchowego/początkowego; stadium początkowe to ilość iteracji lub epok początkowego stadium uczenia sieci neuronowej, kiedy korzysta się z mniejszej początkowej wartości współczynniku uczenia,</li>
+								<li>warmup_learning_rate= 0:13333 - wartość współczynniku uczenia podczas stadia rozruchowego,</li>
+								<li>cosinusoidowa funkcja cosine_decay_learning_rate - podczas uczenia wraz z postępem treningu współczynnik uczenia będzie maleć według zależności cosinus.</li>
+							</ul>
+						</small>
+					</section>
+					<section>
+						<h4>Zbiór uczący</h4>
+						<small>
+							Jako zbiór uczący wybrano zbiór WIDER FACE. Jest to zbiór uczący wykorzystywany przy porównywaniu wyników algorytmów detekcji twarzy(benchmarkach). Najpopularniejszy z nich to FDDB: Face Detection Data Set and Benchmark - korzysta on z części tego zbioru uczącego.
+						</small>
+					</section>
+					<section>
+						<h4>Wyniki MOBILENETV3</h4>
+						<div class="row">
+							<div class="col-lg-6 col-md-12">
+								<img class="my-diagram-style my-mobile-image-style my-vs-image-style" src="image/Mobilenetv3mAP.png" alt="eq">
+								<small><p>Średnia dokładność modelu według miar 'COCO Challenge'</p></small>
+							</div>
+							<div class="col-lg-6 col-md-12">
+								<img class="my-mobile-image-style" src="image/mbntv3TAB.png" alt="eq">
+								<small><p>Średnia prędkość przetwarzania modelu dla rozpatrywanych platform</p></small>
+							</div>
+						</div>
+					</section>
+
+				</section>
+
+				<section>
+					<section>
+						<h2>WŁASNE ROZWIĄZANIE</h2>
+						<small><p> Złożoność obliczeniowa algorytmu: O(n^3)</p></small>
+					</section>
+					<section>
+						Podjęto próbę stworzenia algorytmu detekcji twarzy o jak najmniejszej złożoności obliczeniowej oraz jak największych możliwościach jego zrównoleglenia.
+					</section>
+					<section>
+						<h4>Wybór cech</h4>
+						<div class="row">
+							<div class="col-lg-6 col-md-12">
+								<small>
+									<p>Aby zmniejszyć złożoność obliczeniową, zrezygnowano ze wstępnego przetwarzania obrazu.Zrezygnowano też z wyznaczania złożonych cech obrazu. Aby uzyskać możliwość jak największego zrównoleglenia, postanowiono działać na samych pikselach obrazu.W procesie poszukiwania najlepiej odpowiadającej przestrzeni barw, która byłaby bardziej odporna na zmiany oświetlenia niż przestrzeń barw RGB oraz mogłaby posłużyć jako aproksymacja cech większego rzędu, przetestowano kilka przestrzeni barw oraz kombinacji ich składowych, tworząc nowe przestrzenie barw.</p>
+								</small>
+							</div>
+							<div class="col-lg-6 col-md-12" style="text-align: left;">
+								<img class="my-mobile-image-style" src="image/qRgBy.png" alt="eq"><br>
+								<img class="my-mobile-image-style" src="image/q.png" alt="eq">
+								<img class="my-mobile-image-style" src="image/rg.png" alt="eq">
+								<img class="my-mobile-image-style" src="image/by.png" alt="eq">
+								<small><p>Stworzona przestrzeń barw</p></small>
+							</div>
+						</div>						
+					</section>
+					<section>
+						<h4>Wybór deskryptora</h4>
+						<small>
+							<p>
+								Jako deskryptor cech twarzy wykorzystano histogram rozkładu barw nowo powstałej przestrzeni. Zdecydowano się na histogram, ponieważ można go zaimplementować w sposób szeregowy oraz równoległy: ”LUT table”, bardzo łatwy do obliczenia.
+							</p>
+						</small>
+					</section>
+					<section>
+						<div class="row">
+							<div class="col-lg-6 col-md-12" style="align-content: center;">
+								<img class="my-img-compare"   src="image/slj2.jpg"  alt="eq">
+								<img class="my-img-compare"  src="image/testSamuel2.png" alt="eq">
+								<img class="" style="width: 100% !important; height: auto !important;" src="image/test00.png" alt="eq">
+							</div>
+							<div class="col-lg-6 col-md-12">
+								<img class="" style="width: 170% !important; height: auto !important;" src="image/test1.jpg" alt="eq">
+								<img class="" style="width: 100% !important; height: auto !important;" src="image/testJa2.png" alt="eq">
+							</div>
+						</div>
+					</section>
+				</section>
+
+				<section>
+					<section>
+						<h2>Algorytm podejmowania decyzji o rodzaju przetwarzania pobranego obrazu w celu detekcji twarzy</h2>
+						<small><p> Złożoność obliczeniowa algorytmu algorytmu: O(n^3)</p></small>
+					</section>
+					<section>
+						<small>
+							<p>
+								Nie spotyka się oficjalnego, dedykowanego rozwiązania, które pozwalałoby na wstępną decyzję, czy dany obraz należy poddać przetwarzaniu 
+								algorytmem o większej złożoności czy też nie. Posiada to szczególne zastosowanie w sekwencji wideo, gdzie następujące po sobie obrazy nie posiadają zbyt dużych różnic; oczywiście biorąc pod uwagę odpowiednią częstotliwość pobierania zdjęć oraz prędkość przetwarzania czy też nawet zmiany pozycji patrzenia kamery.W takiej sytuacji ciągłe przetwarzanie każdej klatki albo nawet co n-tej (np. co piątej klat-ki) prowadzi do marnowania zasobów oraz niepotrzebnego zwiększania aktualnej temperatury urządzenia czy pobieranej energii. Biorąc to pod uwagę przy tworzeniu systemu wbudowanego można zmniejszyć jego rozmiary, np. poprzez wyposażenie go w mniejszy system chłodzenia,czy nawet wyposażenie go w baterię o mniejszych rozmiarach. Prowadzi to też do zmniejszenia kosztów końcowych systemu.
+							</p>
+							<p>
+								Nie zamykamy się też na możliwość wykorzystania innych algorytmów, bowiem algorytm o większej złożoności można będzie zastąpić innym. Umożliwia więc to stosowanie różnych algorytmów detekcji twarzy, nawet tych, które mogą dopiero powstać.
+							</p>
+						</small>
+					</section>
+					<section>
+						<div class="row">
+							<div class="col-lg-8 col-md-12" style="align-content: center;">
+								<img class="" style=" margin-top:-3% ; width: 53% !important; height: auto !important;"  src="image/NAFFD1_test.png"  alt="eq">
+							</div>
+							<div class="col-lg-4 col-md-12" style="align-content: center;">
+								<small>
+									<p style="padding-top: 75%;">Schemat blokowy algorytmu decydującego o wyborze rodzaju przetwarzania, wersja szeregowa</p>	
+								</small>
+							</div>
+						</div>
+					</section>
+					<section>
+						<small>
+							<p>
+								Ze względu na to, że zdecydowano się na użycie GPGPU w projektowanym systemie wbudowanym detekcji twarzy, postanowiono wprowadzić kilka dodatkowych modyfikacji. Modyfikacje te będą korzystały z charakteru API OpenCL, więc zostaną wprowadzone tylko do wersji implementacji korzystającej właśnie z tej technologii. W implementacji korzystającej z OpenCL można wysyłać z CPU (host) do GPGPU (device) program (kernel) z parametrami oraz komendy mające na celu uruchomienie wykonywania programu na device.Postanowiono więc skorzystać z tej możliwości. Kiedy host (CPU) wyśle komendę uruchamiającą obliczenia na device (GPGPU), nie będzie czekał na skończenie obliczeń GPGPU tylko przejdzie dalej do swoich zadań, które może wykonać niezależnie od GPGPU. Kiedy CPU do-trze do momentu, gdy wyniki z GPU będą potrzebne do jego dalszej pracy, wtedy ewentualnie zaczeka na skończenie obliczeń przez GPGPU i odczyta otrzymane wyniki. W ten sposób zyskujemy więcej czasu na wykonywanie zadań powierzonych CPU oraz skracamy całkowity czas wykonania programu.
+							</p>
+						</small>
+					</section>
+					<section>
+						<div class="row">
+							<div class="col-lg-8 col-md-12" style="align-content: center;">
+								<img class="" style="width: 80% !important; height: auto !important;"  src="image/NAFFD1GPU_test1.png"  alt="eq">
+							</div>
+							<div class="col-lg-4 col-md-12" style="align-content: center;">
+								<small>
+									<p style="padding-top: 75%;">Schemat blokowy algorytmu decydującego o wyborze rodzaju przetwarzania, wersja równoległa</p>	
+								</small>
+							</div>
+						</div>
+					</section>
+					<section>
+						<div class="row">
+							<div class="col-lg-6 col-md-12" style="align-content: center;">
+								<img class="" style="width: 40% !important; height: auto !important;"  src="image/NAFFD1GPU_test2.png"  alt="eq">
+								<img class="" style="width: 80% !important; height: auto !important;"  src="image/NAFFD1GPU_test4.png"  alt="eq">
+							</div>
+							<div class="col-lg-6 col-md-12" style="align-content: center;">
+								<small>
+									<img class="" style="width: 80% !important; height: auto !important;"  src="image/NAFFD1GPU_test3.png"  alt="eq">	
+								</small>
+							</div>
+							<!-- <div class="col-lg-4 col-md-12" style="align-content: center;">
+								<small>
+									<img class="" style="width: 80% !important; height: auto !important;"  src="image/NAFFD1GPU_test4.png"  alt="eq">	
+								</small>
+							</div> -->
+						</div>
+					</section>
+					
+				</section>
+
+
+				<section>
+					<section>
+						<h2>Wybrane platformy implementacji</h2>
+						<small>
+							<p>
+								Platforma sprzętowa (dalej zwana platformą dla uproszczenia zapisu) to kombinacja hardware’u oraz systemu operacyjnego, która pozwala na uruchomienie na niej programu, procesu.Na potrzeby tej pracy wyróżniono następujące rodzaje platform implementacji:
+							</p>
+
+							<ul>
+								<li>maszyna PC - jej przedstawicielem jest np. komputer personalny z system operacyjnym ogólnego przeznaczania,</li>
+								<li>komputer jednopłytowy, platforma ’Single Board Computer’ (SBC) - jest ściśle powiązana z Maszyną PC, ale jego rozmiary są znacznie mniejsze,</li>
+								<li>platforma mobilna - ściśle powiązana z telefonami komórkowymi, najczęściej oparta na systemie operacyjnym Android.</li>
+							</ul>
+
+							<p>
+								Do dalszych rozważań wybrano następujących przedstawicieli danych platform, na których będą uruchamiane rozpatrywane algorytmy:
+							</p>
+
+							<ul>
+								<li>maszyna PC - maszyna PC z procesorem Intel i5-8350U oraz GPGPU NVIDIA® Quadro®P500</li>
+								<li>komputer jednopłytowy - RaspberryPi3,</li>
+								<li>platforma mobilna - telefon z SoC Qualcomm Snapdragon 625 8953 oraz GPGPU Adreno506</li>
+							</ul>
+
+						</small>
+					</section>
+				</section>
+
+				<section>
+					<section>
+						<h2>Badania doświadczalne rozpatrywanych platform systemów wbudowanych</h2>
+					</section>
+
+					<section>
+						<small>
+							<p>
+								Testy przeprowadzono w celu określenia, jak sprawują się przedstawiciele wybranych platform podczas standardowej pracy. Dokonano pomiarów prędkości przetwarzania wyrażonej w FPS oraz poboru mocy podczas pracy.
+							</p>
+							<p>
+								Do testów wybrano następujące platformy oraz technologie używane przy implementacji własnego rozwiązania:
+							</p>
+
+							<ul>
+								<li>maszyna PC OpenACC GCC (GPU)</li>
+								<li>maszyna PC OpenACC PGI</li>
+								<li>maszyna PC OpenCL</li>
+								<li>maszyna PC OpenMP</li>
+								<li>maszyna PC OpenACC GCC (CPU)</li>
+								<li>platforma mobilna OpenCL</li>
+								<li>platforma mobilna OpenMP</li>
+								<li>platforma SBC OpenMP</li>
+							</ul>
+
+
+
+						</small>
+					</section>
+
+					<section>
+						<small>
+							Na platformach uruchamiano rożne implementacje własnego rozwiązania, które miały wspomagać algorytm detekcji twarzy o większej złożoności obliczeniowej. Jako algorytm detekcji twarzy wybrano algorytm Viola-Jones. Wybrano ten algorytm ze względu na to, że posiadał gorsze albo zbliżone osiągi (średnia prędkość przetwarzania) niż sieć MobileNetV3+SSDLite,przez co korzyści wynikające z zastosowania własnego rozwiązania były bardziej zauważalne.Wybrano też algorytm Viola-Jones ze względu na jego popularność, powstałą ilość modyfikacji mających przyspieszyć jego wykonywanie. Ułatwi to porównanie uzyskanych wyników z wynikami modyfikacji wykonanych przez inne podmioty.
+						</small>
+					</section>
+
+					<section>
+						<h4>Opis badań  oraz poboru mocy</h4>
+						<p style="text-align: left; margin-top: 5%;">Prędkości przetwarzania</p>
+						<small style="margin-top: -3%;">
+							<p>
+								Do testów wykorzystano część sekwencji filmu ”Matrix” (56:33-58:33) o rozmiarze klatki 480x320.
+							</p>
+						</small>
+						<p style="text-align: left;">Poboru mocy</p>
+						<small style="margin-top: -3%;">
+							<p>
+								Zdecydowano się na pomiar właśnie tej wielkości ze względu na to, że pozwala ona ocenić pobór zasobów, wybrać rodzaj źródła zasilania oraz porównać pod tym względem urządzenia zaopatrzone w źródła zasilania o innych właściwościach.
+							</p>
+						</small>
+					</section>
+
+					<section>
+						<h2>Wyniki badań doświadczalnych</h2>
+					</section>
+
+					<section>
+						<h4>Wyniki badań dotyczących prędkości przetwarzania</h4>
+					</section>
+
+					<section>
+						<h5>Platforma PC</h5>
+						<div>
+							<div class="row justify-content-lg-center">
+								<div class="col-lg-3 col-md-12" style="align-content: center;">
+									<img class="my-chart-block" src="image/PC_FPS_OMP.png"  alt="eq">
+									<small class="my-chart-block" style="font-size:50% ;">Platforma PC, openMP, GCC</small>
+								</div>
+								<div class="col-lg-3 col-md-12" style="align-content: center;">
+									<img class="my-chart-block" src="image/PC_FPS_ACC_GCC_OMP.png"  alt="eq">
+									<small class="my-chart-block" style="font-size:50%">Platforma PC, użycie openMP przez openACC, GCC</small>
+								</div>
+							</div>
+							<div class="row justify-content-lg-center" style="margin-bottom: 1% !important">
+								<div class="col-lg-3 col-md-12" style="align-content: center;">
+									<img class="my-chart-block" src="image/PC_FPS_ACC_GCC_GPU.png"  alt="eq">
+									<small class="my-chart-block" style="font-size:50%">Platforma PC, użycie openACC, GCC</small>
+								</div>
+								<div class="col-lg-3 col-md-12" style="align-content: center;">
+									<img class="my-chart-block" src="image/PC_FPS_ACC_PGI.png"  alt="eq">
+									<small class="my-chart-block" style="font-size:50%">Platforma PC, openACC, PGI</small>
+								</div>
+								<div class="col-lg-3 col-md-12" style="align-content: center;">
+									<img class="my-chart-block" src="image/PC_FPS_OCL.png"  alt="eq">
+									<small class="my-chart-block" style="font-size:50%">Platforma PC, openCL, GCC</small>
+								</div>
+							</div>						
+						</div>
+					</section>
+					<section>
+						<h5>Platforma SBC</h5>
+						<div class="row justify-content-lg-center">
+							<div class="col-lg-3 col-md-12" style="align-content: center;">
+								<img class="my-chart-block" src="image/SBC_FPS_OMP.png"  alt="eq">
+								<small class="my-chart-block" style="font-size:50% ;">Platforma SBC, openMP, GCC</small>
+							</div>
+						</div>
+						<h5>Platforma mobilna</h5>
+						<div class="row justify-content-lg-center">
+							<div class="col-lg-3 col-md-12" style="align-content: center;">
+								<img class="my-chart-block" src="image/MOBILE_FPS_OMP.png"  alt="eq">
+								<small class="my-chart-block" style="font-size:50% ;">Platforma Mobilna, openMP</small>
+							</div>
+							<div class="col-lg-3 col-md-12" style="align-content: center;">
+								<img class="my-chart-block" src="image/MOBILE_FPS_OCL.png"  alt="eq">
+								<small class="my-chart-block" style="font-size:50% ;">Platforma Mobilna, openCL</small>
+							</div>
+						</div>
+					</section>
+					<section>
+						<div class="row justify-content-lg-center">
+						<div class="col-lg-6 col-md-12" style="align-content: center;">
+							<img class="my-chart-block" style="width: 100% !important; height: auto !important; " src="image/avgFPS.png"  alt="eq">
+						</div>
+						<div class="col-lg-6 col-md-12" style="align-content: center;">
+							<img class="my-chart-block" style="width: 100% !important; height: auto !important; " src="image/avgFPSTab.png"  alt="eq">
+						</div>
+						</div>
+					</section>
+
+					<section>
+						<h4>Wyniki badań dotyczących poboru mocy</h4>
+					</section>
+					<section>
+						<h4>Wyniki badań dotyczących poboru mocy</h4>
+						<div class="row justify-content-lg-center">
+							<div class="col-lg-6 col-md-12" style="align-content: center;">
+								<img class="my-chart-block" style="width: 100% !important; height: auto !important; " src="image/powerChart.png"  alt="eq">
+							</div>
+							<div class="col-lg-6 col-md-12" style="align-content: center;">
+								<img class="my-chart-block" style="width: 100% !important; height: auto !important; " src="image/avgPower.png"  alt="eq">
+							</div>
+						</div>
+						<div class="row justify-content-lg-center">
+							<img class="my-chart-block" style="width: 45% !important; height: auto !important; " src="image/avgPowerTab.png"  alt="eq">
+						</div>
+					</section>
+					<section>
+						<h4>Podsumowanie badań</h4>
+						<small>
+							<ul>
+								<li>Platforma o największej średniej prędkości przetwarzania:Platforma oparta na maszyniePC.</li>
+								<li>Platforma o najmniejszej średniej prędkości przetwarzania:Platforma mobilna.</li>
+								<li>Platforma o najmniejszym rozrzucie prędkości przetwarzania (najbardziej stabilna): Plat-forma mobilna.</li>
+								<li>Platforma o największym rozrzucie prędkości przetwarzania:Maszyna PC.</li>
+								<li>Platforma o najmniejszym rozrzucie prędkości przetwarzania:Platforma mobilna.</li>
+								<li>Platforma o najlepszej minimalnej prędkości przetwarzania:Maszyna PC.</li>
+								<li>Platforma o najgorszej minimalnej prędkości przetwarzania:Platforma SBC.</li>
+								<li>Technologia programowania GPGPU zapewniająca największą prędkość przetwarzania:OpenCL.Platforma o najmniejszym średnim poborze mocy:Platforma mobilna.</li>
+								<li>Platforma o największym średnim poborze mocy:Platforma PC. 
+								<li>Platforma o największym stosunku średniej prędkości przetwarzania do średniego poboru mocy:Platforma SBC.</li>
+								<li>Platforma o najmniejszym stosunku średniej prędkości przetwarzania do średniego poboru mocy:Platforma mobilna.</li>
+								<li>Platforma o największym stosunku minimalnej prędkości przetwarzania do maksymalnego poboru mocy:Platforma mobilna.</li>
+								<li>Platforma o najmniejszym stosunku minimalnej prędkości przetwarzania do maksymalnego poboru mocy:Platforma SBC</li>
+							</ul>
+						</small>
+					</section>
+					<section>
+						<h4>Wybór najlepszej platformy</h4>
+						<small>
+							Wybranie odpowiadającej platformy jest stosunkowo proste, gdy brane jest pod uwagę jedno kryterium. Problem następuje wtedy, kiedy należy dokonać wyboru biorąc pod uwagę kilka kryteriów, jak np. cena, łatwość implementacji i inne. Wtedy można posłużyć się algorytmami oraz metodami z teorii podejmowania decyzji. Jedną z najprostszych metod stosowanych w teorii podejmowania decyzji jest zastosowanie sumy ważonej poszczególnych kryteriów oraz wybranie wariantu, który uzyska najlepszy rezultat.
+						</small>
+						<div class="row justify-content-lg-center" style=" margin-bottom:1% !important">
+							<div class="col-lg-6 col-md-12" style="align-content: center;">
+								<img class="my-chart-block" style="width: 35% !important; height: auto !important; margin-top: 10% !important; " src="image/decisionF1.png"  alt="eq">
+								<img class="my-chart-block" style="width: 35% !important; height: auto !important; " src="image/decisionF2.png"  alt="eq">
+							</div>
+							<div class="col-lg-6 col-md-12" style="align-content: center;">
+
+								<small>
+									<p> Gdzie,F- wynik końcowy funkcji decyzyjnej,Fj- wynik ważonej sumy kryteriów dla rozpatrywanego wariantu j, wji- waga mówiąca o wpływie danego kryterium i na wariant j, aji- wartość danego kryterium i dla wariantu j, N- ilość rozpatrywanych kryteriów,K- ilość rozpatrywanych wariantów
+									</p>
+								</small>
+							</div>
+						</div>
+						<div class="row justify-content-lg-center">
+						<small>
+							<p>
+								Założono, że wszystkie kryteria są tak samo ważne (pożądane). Ułatwia to dobór wag wi,oznacza to, że wszystkie będą takie same.
+							</p>
+						</small>
+					</div>
+					</section>
+					<section>
+						<small>
+							<p>Wybrane kryteria:</p>
+							<ul>
+								<li>a1- średnia prędkość przetwarzania,</li>
+								<li>a2- średni pobór mocy,</li>
+								<li>a3- stosunek minimalnej prędkości przetwarzania do maksymalnego chwilowego poboru mocy,</li>
+								<li>a4- cena systemu wbudowanego.</li>
+							</ul>
+
+						<div class="row justify-content-lg-center">
+							<img class="my-chart-block" style="width: 50% !important; height: auto !important; margin-top: 1% !important; " src="image/decisionValpng.png"  alt="eq">
+						</div>
+						
+							<p>
+								Według tak stworzonego kryterium najlepszym wyborem jest platforma mobilna z uruchomioną na niej implementacją wykorzystującą OpenMP. Następnie ta sama platforma z technologią OpenCL. Drugą wybraną platformą jest platforma SBC, w tym przypadku jej cena oraz stosunek średniej prędkości przetwarzania do średniej pobieranej mocy jest nie bez znaczenia. Gdyby nie wziąć pod uwagę kryterium a3, to platforma SBC osiągnęłaby najlepszy wynik.
+							</p>
+						</small>
+					</section>
+
+					<section>
+						<h4>Porównanie technologii implementacji</h4>
+						<small>
+						<div class="container">
+							<div class="row">
+								<div class="col-lg-6"><em><h5>openACC</h5>  </em></div>
+								<div class="col-lg-6"><em><h5>openCL</h5></em></div>
+							</div>
+							<div class="row">
+								<div class="col-lg-6">- Krótszy Time-to-market</div>
+								<div class="col-lg-6">- Dłuższy Time-to-market</div>
+							</div>
+							<div class="row">
+								<div class="col-lg-6">- Prostsza w użyciu</div>
+								<div class="col-lg-6">- Trudniejsza w użyciu</div>
+							</div>
+							<div class="row">
+								<div class="col-lg-6">- Mniej popularna</div>
+								<div class="col-lg-6">- Bardziej popularna</div>	
+							</div>
+							<div class="row">
+								<div class="col-lg-6">- Obsługuje mniejszą ilość platform oraz urządzeń (mniejsza przenośność)</div>
+								<div class="col-lg-6">- Obsługuje większą ilość platform oraz urządzeń (większa przenośność)</div>	
+							</div>
+							<div class="row">
+								<div class="col-lg-6">- Uzyskuje mniejsze prędkości przetwarzania niż openCL</div>
+								<div class="col-lg-6">- Pozwala na uzyskanie większych prędkości przetwarzania</div>	
+							</div>
+							<div class="row">
+								<div class="col-lg-6">- Trudno znaleźć dogodne materiały szkoleniowe</div>
+								<div class="col-lg-6">- Posiada lepsze wsparcie oraz więcej materiałów szkoleniowych niż OpenACC</div>	
+							</div>
+							<div class="row">
+								<div class="col-lg-6">- Oficjalnie dostępna aktualnie tylko w c/c++ oraz fortran</div>
+								<div class="col-lg-6">- Oficjalnie dostępna na c/c++ oraz fortran, ale istnieją różne wrapery, narzędzia umożliwiające wykorzystanie jej w różnych językach programowania, chociaż kernel (procedura uruchamiana na GPGPU) musi i tak być napisana w języku c.</div>	
+							</div>
+						</div>
+						</small>
+					</section>
+
+					
+					<section>
+						<h4>Porównanie technologii implementacji</h4>
+						<small style="font-size: 60%;">
+						<div class="container">
+							<div class="row">
+								<div class="col-lg-4"><em><h5>Platforma PC</h5>  </em></div>
+								<div class="col-lg-4"><em><h5>Platforma SBC</h5></em></div>
+								<div class="col-lg-4"><em><h5>Platforma Mobilna</h5>  </em></div>
+							</div>
+							<div class="row">
+								<div class="col-lg-4">- Największa średnia prędkość przetwarzania</div>
+								<div class="col-lg-4">- Średnia prędkość przetwarzania znacząco większa niż w platformie mobilnej</div>
+								<div class="col-lg-4">- Najmniejsza średnia prędkość przetwarzania</div>
+							</div>
+							<div class="row">
+								<div class="col-lg-4">- Powtarzalność wyników znacząco mniejsza niż w przypadku platformy mobilnej (kryterium a3)</div>
+								<div class="col-lg-4">- Tak samo jak w przypadku platformy PC</div>
+								<div class="col-lg-4">- Najlepsza powtarzalność wyników (kryterium a3)</div>
+							</div>
+							<div class="row">
+								<div class="col-lg-4">- Sterowniki i technologie są bardziej dostępne niż na poprzednie platformy</div>
+								<div class="col-lg-4">- Największym mankamentem może być brak potrzebnych bibliotek, o ile producent ich nie zapewnił</div>
+								<div class="col-lg-4">- Dostęp do sterowników, bibliotek lepszy niż w przypadku SBC</div>
+							</div>
+							<div class="row">
+								<div class="col-lg-4">- Największy koszt urządzenia</div>
+								<div class="col-lg-4">- Niski koszt urządzenia</div>
+								<div class="col-lg-4">- Niski koszt urządzenia</div>
+							</div>
+							<div class="row">
+								<div class="col-lg-4">- Najmniej czasochłonna implementacja</div>
+								<div class="col-lg-4">- Czasochłonność podobna do platformy PC</div>
+								<div class="col-lg-4">- Najbardziej czasochłonna implementacja</div>
+							</div>
+							
+						</div>
+						</small>
+					</section>
+
+				</section>
+
+				<section>
+					<section>
+						<h2>Wnioski</h2>
+					</section>
+					<section>
+						<h4>Wnioski dotyczące rozpatrywanych algorytmów</h4>
+						<small> 
+						<ul>
+							<li> Dla algorytmów działających w skali szarości dobrze jest stosować kamerę, z której możemy uzyskać od razu kanał skali szarości. Nie traci się czasu na konwersję z innej przestrzeni barw.</li>
+							<li>     Kiedy dysponujemy GPU, można podjąć próbę zaimplementowania lub wykorzystania implementacji algorytmu opartego o bardziej złożoną architekturę sieci neuronowej (nie mobilną). </li>
+							<li>     Kiedy dostępna jest tylko jednostka obliczeniowa CPU lepiej nie używać skomplikowanych architektur sieci neuronowych.</li>
+							<li>     Kiedy dostępna jest tylko jedna jednostka obliczeniowa, np. CPU, lepiej jest użyć klasycznych metod o mniejszej złożoności niż Viola-Jones (załącznik A) lub mobilną architekturę sieci neuronowej oraz jeżeli jest to możliwe, wykorzystać technologię, która umożliwi wykonanie algorytmu wielowątkowo, np. OpenMP.</li>
+							<li>     Aby uzyskać większą dokładność algorytmu, należy dokonać ekstrakcji większej ilości informacji bądź dokonać ekstrakcji informacji wyższych rzędów (jak np. w algorytmie FAUFD). Niestety, może to zwiększyć złożoność obliczeniową algorytmu.</li>
+							<li>     Ciekawym, wartym rozważenia rozwiązaniem, byłoby zastosowanie kilku metod oraz opracowane algorytmu podejmowania decyzji, który wybrałby wyniki warte uwzględnienia w danej sytuacji. Można też byłoby rozważyć stworzenie algorytmu działającego w domenie skompresowanej.</li>
+							<!-- <li>     Im bardziej zbliżamy się do hardware'u (głównie mowa tu o FPGA \cite{LowCostFPGA} \cite{LowCostFPGA1}), tym lepiej jest użyć metod "prymitywnych" o mniejszej złożoności obliczeniowej niż mobilne sieci neuronowe.</li>
+							<li>     Część algorytmów z grupy metod klasycznych do detekcji innych obiektów niż te, do których zostały stworzone, są trudne do przystosowania. Sieci neuronowe są łatwiejsze do przystosowania oraz powszechniej stosowane w przemyśle.</li>
+							<li>     Metody oparte o sieci neuronowe łatwiej jest wykorzystać do detekcji innych obiektów.</li>
+							<li>     Algorytmy mogą zostać opatentowane nawet po dłuższym czasie od ich opublikowania, co utrudni lub nawet uniemożliwi stosowanie ich we własnych komercyjnych projektach. </li>
+							<li>     Lepszym rozwiązaniem jest użycie algorytmu do wyboru cech oraz klasyfikatora niż dokonywać poszukiwania cech i struktury klasyfikatora własnoręcznie.</li>
+							<li>     Użycie algorytmu już zaimplementowanego oraz udostępnionego w bibliotece skraca czas projektowania i produkcji oraz zmniejsza jednorazowy koszt projektowania systemu wbudowanego. Jednak nie jest to rozwiązanie, które przyczyniłoby się do rozwoju tematyki detekcji twarzy w obrazie.</li>
+							<li>     Można byłoby rozważyć podejście wykorzystujące algorytm typu NAS \cite{NAS}, NetAdapt, który poszukiwałby optymalnej architektury sieci neuronowej dla danej platformy. To rozwiązanie mogłoby zoptymalizować algorytm dla danej platformy. Wadą tego rozwiązania jest zmniejszenie przenośności oraz konieczność ponawiania poszukiwań optymalnej architektury i procesu uczenia modelu. Taka sytuacja zaistnieje nawet przy zmianie platformy czy samego hardware'u nawet bez zmiany systemu operacyjnego. Przeprowadzanie procesu uczenia na urządzeniu docelowym często o znacznie mniejszych zasobach zajmuje więcej czasu niż na dedykowanej stacji, na której zazwyczaj dokonuje się uczenia modelu.</li> -->
+							</ul>
+						</small>
+					</section>
+					<section>
+						<small >
+							<ul>
+							<li>     Im bardziej zbliżamy się do hardware'u (głównie mowa tu o FPGA), tym lepiej jest użyć metod "prymitywnych" o mniejszej złożoności obliczeniowej niż mobilne sieci neuronowe.</li>
+							<li>     Część algorytmów z grupy metod klasycznych do detekcji innych obiektów niż te, do których zostały stworzone, są trudne do przystosowania. Sieci neuronowe są łatwiejsze do przystosowania oraz powszechniej stosowane w przemyśle.</li>
+							<li>     Metody oparte o sieci neuronowe łatwiej jest wykorzystać do detekcji innych obiektów.</li>
+							<li>     Algorytmy mogą zostać opatentowane nawet po dłuższym czasie od ich opublikowania, co utrudni lub nawet uniemożliwi stosowanie ich we własnych komercyjnych projektach. </li>
+							<!-- <li>     Lepszym rozwiązaniem jest użycie algorytmu do wyboru cech oraz klasyfikatora niż dokonywać poszukiwania cech i struktury klasyfikatora własnoręcznie.</li>
+							<li>     Użycie algorytmu już zaimplementowanego oraz udostępnionego w bibliotece skraca czas projektowania i produkcji oraz zmniejsza jednorazowy koszt projektowania systemu wbudowanego. Jednak nie jest to rozwiązanie, które przyczyniłoby się do rozwoju tematyki detekcji twarzy w obrazie.</li>
+							<li>     Można byłoby rozważyć podejście wykorzystujące algorytm typu NAS \cite{NAS}, NetAdapt, który poszukiwałby optymalnej architektury sieci neuronowej dla danej platformy. To rozwiązanie mogłoby zoptymalizować algorytm dla danej platformy. Wadą tego rozwiązania jest zmniejszenie przenośności oraz konieczność ponawiania poszukiwań optymalnej architektury i procesu uczenia modelu. Taka sytuacja zaistnieje nawet przy zmianie platformy czy samego hardware'u nawet bez zmiany systemu operacyjnego. Przeprowadzanie procesu uczenia na urządzeniu docelowym często o znacznie mniejszych zasobach zajmuje więcej czasu niż na dedykowanej stacji, na której zazwyczaj dokonuje się uczenia modelu.</li> -->
+
+							</ul>
+						</small>
+					</section>
+					<section>
+						<small>
+							<ul>
+								<li>     Lepszym rozwiązaniem jest użycie algorytmu do wyboru cech oraz klasyfikatora niż dokonywać poszukiwania cech i struktury klasyfikatora własnoręcznie.</li>
+								<li>     Użycie algorytmu już zaimplementowanego oraz udostępnionego w bibliotece skraca czas projektowania i produkcji oraz zmniejsza jednorazowy koszt projektowania systemu wbudowanego. Jednak nie jest to rozwiązanie, które przyczyniłoby się do rozwoju tematyki detekcji twarzy w obrazie.</li>
+								<li>     Można byłoby rozważyć podejście wykorzystujące algorytm typu NAS, NetAdapt, który poszukiwałby optymalnej architektury sieci neuronowej dla danej platformy. To rozwiązanie mogłoby zoptymalizować algorytm dla danej platformy. Wadą tego rozwiązania jest zmniejszenie przenośności oraz konieczność ponawiania poszukiwań optymalnej architektury i procesu uczenia modelu. Taka sytuacja zaistnieje nawet przy zmianie platformy czy samego hardware'u nawet bez zmiany systemu operacyjnego. Przeprowadzanie procesu uczenia na urządzeniu docelowym często o znacznie mniejszych zasobach zajmuje więcej czasu niż na dedykowanej stacji, na której zazwyczaj dokonuje się uczenia modelu.</li>
+	
+							</ul>
+						</small>
+					</section>
+					<section>
+						<h4>Wnioski dotyczące metody punktów przypadków użycia przy szacowaniu oprogramowania systemu wbudowanego dedykowanego do detekcji twarzy</h4>
+						<small>
+							<ul>
+								<li> Metoda jest dobra do szacowania systemów informatycznych.</li>
+								<li>     Zidentyfikowanie wymagań pomaga przy projektowaniu systemu wbudowanego. Nakreśla idee oraz oczekiwania przyszłego użytkownika końcowego systemu. Ułatwia wybór sposobu  rozwiązania problemu, podjęcie decyzji projektowych, na których będzie oparty system.</li>
+								<li>     Pomaga przy wyznaczeniu pracochłonności i szacowaniu kosztów jednorazowych projektowanego rozwiązania na podstawie wybranych decyzji projektowych.</li>
+								<li>     Przy szacowaniu danych przypadków użycia może wystąpić niedoszacowanie oraz przeszacowanie pracochłonności poszczególnych przypadków użycia. Przypadki użycia wykorzystujące bardziej złożone algorytmy, które trudniej jest zaimplementować, mogą otrzymać miano mniej złożonych lub podobnie złożonych niż te, które posiadają więcej transakcji (kroków), ale mniej skomplikowanych (np. UC6 oraz UC7).</li>
+								<!-- <li>     Szacowanie systemu powinno rozpatrywać tyko przypadki celu użytkownika. W systemach wbudowanych, które są tworzone do ściśle określonego zadania, mogą być one trudne do zaobserwowania. Większość przypadków użycia stanowią przypadki poziomu podprzypadku użycia czy poziomu biznesowego. Może to też sprawiać trudności oraz nieścisłości w szacowaniu pracochłonności systemu wbudowanego.</li>
+								<li>     Metoda nie uwzględnia, czy dany przypadek należy zaimplementować od nowa lub czy można wykorzystać już istniejącą implementację z biblioteki/frameworku.% Opisanie większej ilości przypadków użycia poziomu podprzypadku powinno zwiększyć dokładność szacowania.</li>
+								<li>     W metodzie przy szacowaniu nie uwzględnia się czasu poświęconego na uczenie modelu sieci neuronowej (w przypadku metod wykorzystujących sieci neuronowe), który może być dłuższy niż wynikowa pracochłonność wytworzenia systemu.</li>
+								<li>     Metoda uwzględnia poziom doświadczenia programistów (osób implementujących dany system). Niestety, czasem może się okazać to niewystarczające. Szczególnie wtedy, kiedy wystąpią problemy związane z narzędziami developerskimi czy problemy nieopisane w dokumentacji (np. problemy związane z implementacją na platformę mobilną). Osobie niedoświadczonej portowanie implementacji maszyny PC na platformę mobilną może zająć nawet do 168 roboczogodzin. Metoda najlepiej sprawdza się przy szacowaniu pracochłonności wytworzenia oprogramowania dla osób doświadczonych, znających potrzebne narzędzia oraz dziedzinę techniczną projektu.</li>
+								<li>     Metoda najlepiej sprawdza się przy szacowaniu kolejnych projektów, realizowanych przez ten sam zespół. Na podstawie poprzednich doświadczeń można dokładniej oszacować współczynnik $PF$. Jest to najbardziej polecana metoda, ale niestety, niemożliwa do zastosowania przy pierwszych projektach. Przy tych zaleca się stosować metodę Schneidera-Wintersa.</li> -->
+								</ul>
+						</small>
+					</section>
+					<section>
+						<small>
+							<ul>
+								<!-- <li> Metoda jest dobra do szacowania systemów informatycznych.</li>
+								<li>     Zidentyfikowanie wymagań pomaga przy projektowaniu systemu wbudowanego. Nakreśla idee oraz oczekiwania przyszłego użytkownika końcowego systemu. Ułatwia wybór sposobu  rozwiązania problemu, podjęcie decyzji projektowych, na których będzie oparty system.</li>
+								<li>     Pomaga przy wyznaczeniu pracochłonności i szacowaniu kosztów jednorazowych projektowanego rozwiązania na podstawie wybranych decyzji projektowych.</li>
+								<li>     Przy szacowaniu danych przypadków użycia może wystąpić niedoszacowanie oraz przeszacowanie pracochłonności poszczególnych przypadków użycia. Przypadki użycia wykorzystujące bardziej złożone algorytmy, które trudniej jest zaimplementować, mogą otrzymać miano mniej złożonych lub podobnie złożonych niż te, które posiadają więcej transakcji (kroków), ale mniej skomplikowanych (np. UC6 oraz UC7).</li> -->
+								<li>     Szacowanie systemu powinno rozpatrywać tyko przypadki celu użytkownika. W systemach wbudowanych, które są tworzone do ściśle określonego zadania, mogą być one trudne do zaobserwowania. Większość przypadków użycia stanowią przypadki poziomu podprzypadku użycia czy poziomu biznesowego. Może to też sprawiać trudności oraz nieścisłości w szacowaniu pracochłonności systemu wbudowanego.</li>
+								<li>     Metoda nie uwzględnia, czy dany przypadek należy zaimplementować od nowa lub czy można wykorzystać już istniejącą implementację z biblioteki/frameworku.</li>
+								<li>     W metodzie przy szacowaniu nie uwzględnia się czasu poświęconego na uczenie modelu sieci neuronowej (w przypadku metod wykorzystujących sieci neuronowe), który może być dłuższy niż wynikowa pracochłonność wytworzenia systemu.</li>
+								<!-- <li>     Metoda uwzględnia poziom doświadczenia programistów (osób implementujących dany system). Niestety, czasem może się okazać to niewystarczające. Szczególnie wtedy, kiedy wystąpią problemy związane z narzędziami developerskimi czy problemy nieopisane w dokumentacji (np. problemy związane z implementacją na platformę mobilną). Osobie niedoświadczonej portowanie implementacji maszyny PC na platformę mobilną może zająć nawet do 168 roboczogodzin. Metoda najlepiej sprawdza się przy szacowaniu pracochłonności wytworzenia oprogramowania dla osób doświadczonych, znających potrzebne narzędzia oraz dziedzinę techniczną projektu.</li>
+								<li>     Metoda najlepiej sprawdza się przy szacowaniu kolejnych projektów, realizowanych przez ten sam zespół. Na podstawie poprzednich doświadczeń można dokładniej oszacować współczynnik $PF$. Jest to najbardziej polecana metoda, ale niestety, niemożliwa do zastosowania przy pierwszych projektach. Przy tych zaleca się stosować metodę Schneidera-Wintersa.</li> -->
+								</ul>
+						</small>
+					</section>
+					<section>
+						<small>
+							<ul>
+								<!-- <li> Metoda jest dobra do szacowania systemów informatycznych.</li>
+								<li>     Zidentyfikowanie wymagań pomaga przy projektowaniu systemu wbudowanego. Nakreśla idee oraz oczekiwania przyszłego użytkownika końcowego systemu. Ułatwia wybór sposobu  rozwiązania problemu, podjęcie decyzji projektowych, na których będzie oparty system.</li>
+								<li>     Pomaga przy wyznaczeniu pracochłonności i szacowaniu kosztów jednorazowych projektowanego rozwiązania na podstawie wybranych decyzji projektowych.</li>
+								<li>     Przy szacowaniu danych przypadków użycia może wystąpić niedoszacowanie oraz przeszacowanie pracochłonności poszczególnych przypadków użycia. Przypadki użycia wykorzystujące bardziej złożone algorytmy, które trudniej jest zaimplementować, mogą otrzymać miano mniej złożonych lub podobnie złożonych niż te, które posiadają więcej transakcji (kroków), ale mniej skomplikowanych (np. UC6 oraz UC7).</li> -->
+								<!-- <li>     Szacowanie systemu powinno rozpatrywać tyko przypadki celu użytkownika. W systemach wbudowanych, które są tworzone do ściśle określonego zadania, mogą być one trudne do zaobserwowania. Większość przypadków użycia stanowią przypadki poziomu podprzypadku użycia czy poziomu biznesowego. Może to też sprawiać trudności oraz nieścisłości w szacowaniu pracochłonności systemu wbudowanego.</li>
+								<li>     Metoda nie uwzględnia, czy dany przypadek należy zaimplementować od nowa lub czy można wykorzystać już istniejącą implementację z biblioteki/frameworku.% Opisanie większej ilości przypadków użycia poziomu podprzypadku powinno zwiększyć dokładność szacowania.</li>
+								<li>     W metodzie przy szacowaniu nie uwzględnia się czasu poświęconego na uczenie modelu sieci neuronowej (w przypadku metod wykorzystujących sieci neuronowe), który może być dłuższy niż wynikowa pracochłonność wytworzenia systemu.</li> -->
+								<li>     Metoda uwzględnia poziom doświadczenia programistów (osób implementujących dany system). Niestety, czasem może się okazać to niewystarczające. Szczególnie wtedy, kiedy wystąpią problemy związane z narzędziami developerskimi czy problemy nieopisane w dokumentacji (np. problemy związane z implementacją na platformę mobilną). Osobie niedoświadczonej portowanie implementacji maszyny PC na platformę mobilną może zająć nawet do 168 roboczogodzin. Metoda najlepiej sprawdza się przy szacowaniu pracochłonności wytworzenia oprogramowania dla osób doświadczonych, znających potrzebne narzędzia oraz dziedzinę techniczną projektu.</li>
+								<li>     Metoda najlepiej sprawdza się przy szacowaniu kolejnych projektów, realizowanych przez ten sam zespół. Na podstawie poprzednich doświadczeń można dokładniej oszacować współczynnik $PF$. Jest to najbardziej polecana metoda, ale niestety, niemożliwa do zastosowania przy pierwszych projektach. Przy tych zaleca się stosować metodę Schneidera-Wintersa.</li>
+								</ul>
+						</small>
+					</section>
+				</section>
+				<section>
+				<section>
+					<h2>Podsumowanie</h2>
+				</section>
+				<section>
+					<small>
+					<ul>
+						<li> Dokonano przeglądu metod detekcji twarzy</li>
+						<li>     Dokonano przeglądu algorytmów detekcji twarzy</li>
+						<li>     Dokonano przeglądu technologii wykorzystywanych przy implementacji algorytmów przetwarzania obrazu</li>
+						<li>     Dokonano przeglądu rozwiązań systemów wbudowanych dedykowanych do przetwarzania obrazu</li>
+						<li>     Dokonano klasyfikacji rozwiązań systemów wbudowanych dedykowanych do przetwarzania obrazu</li>
+						<li>     Wybrano platformy sprzętowe do dalszych badań</li>
+						<li>     Dokonano identyfikacji wymagań systemu wbudowanego do detekcji twarzy</li>
+						<li>     Dokonano opisu systemu wbudowanego do detekcji twarzy metodami inżynierii oprogramowania</li>
+						<li>     Dokonano oszacowania pracochłonności wytwarzania oprogramowania systemu wbudowanego do detekcji twarzy za pomocą metody punktów przypadków użycia</li>
+						<li>     Dokonano opisu wybranych algorytmów detekcji twarzy</li>
+						<li>     Dokonano badań możliwości zrównoleglenia algorytmu FAUFD</li>
+						<li>     Dokonano uczenia modelu sieci neuronowej MobileNetV3+SSDLite, przystosowano ją do detekcji twarzy</li>
+						<li>     Zaimplementowano model sieci neuronowej MobileNetV3+SSDLite na wszystkie rozpatrywane platformy</li>
+						<li>     Dokonano pomiarów średniej precyzji oraz średniej prędkości przetwarzania sieci MobileNetV3+SSDLite</li>
+						<li>     Stworzono własne rozwiązanie detekcji twarzy oparte o metody "prymitywne"</li>
+						<!-- <li>     Dokonano implementacji własnego rozwiązania</li>
+						<li>     Stworzono własny algorytm podejmowania decyzji o rodzaju przetwarzania pobranego obrazu w celu detekcji twarzy</li>
+						<li>     Dokonano implementacji algorytmu podejmowania decyzji o rodzaju przetwarzania pobranego obrazu w celu detekcji twarzy w wersji szeregowej oraz równoległej na wszystkie rozważane platformy za pomocą rozpatrywanych technologii</li>
+						<li>     Dokonano badań średniej prędkości przetwarzania oraz średniego poboru mocy rozważanych platform, wykorzystujących różne implementacje algorytmu wspomagającego detekcję twarzy oraz algorytmu detekcji twarzy o większej złożoności obliczeniowej</li>
+						<li>     Ustalono kryteria oceny rozważanych platform wbudowanych wykorzystujących różne technologie implementacji, będące rozważanymi wariantami</li>
+						<li>     Dokonano porównania wykorzystywanych technologii implementacji</li>
+						<li>     Dokonano porównania rozważanych platform</li>
+						<li>     Stworzono funkcję decydującą o najlepszym wariancie</li>
+						<li>     Na podstawie stworzonej funkcji wybrano najlepszy wariant</li>
+						<li>     Dokonano oceny metody szacowania pracochłonności oprogramowania pod względem przydatności przy tworzeniu oprogramowania systemów wbudowanych</li>
+						<li>     Spełniono następujące wymagania funkcjonalne:</li>
+								<ul>
+								<li>             UC6: Badanie obrazu</li>
+								<li>             UC7: Oznaczanie twarzy na obrazie</li>
+								<li>             UC8: Udostępnienie obrazu z oznaczonymi twarzami na ekranie</li>
+								</ul>
+						<li>        Dziłający prototyp można udostępnić klientowi, a wymagania funkcjonalne o mniejszym priorytecie zaimplementować w późniejszym czasie</li>
+						<li>     Stworzono trzy systemy wbudowane dedykowane do detekcji twarzy oraz wybrano ten, który najlepiej spełnia funkcję oceny</li> -->
+						</ul>
+					</small>
+				</section>
+				<section>
+					<small>
+					<ul>
+						<li>     Dokonano implementacji własnego rozwiązania</li>
+						<li>     Stworzono własny algorytm podejmowania decyzji o rodzaju przetwarzania pobranego obrazu w celu detekcji twarzy</li>
+						<li>     Dokonano implementacji algorytmu podejmowania decyzji o rodzaju przetwarzania pobranego obrazu w celu detekcji twarzy w wersji szeregowej oraz równoległej na wszystkie rozważane platformy za pomocą rozpatrywanych technologii</li>
+						<li>     Dokonano badań średniej prędkości przetwarzania oraz średniego poboru mocy rozważanych platform, wykorzystujących różne implementacje algorytmu wspomagającego detekcję twarzy oraz algorytmu detekcji twarzy o większej złożoności obliczeniowej</li>
+						<li>     Ustalono kryteria oceny rozważanych platform wbudowanych wykorzystujących różne technologie implementacji, będące rozważanymi wariantami</li>
+						<li>     Dokonano porównania wykorzystywanych technologii implementacji</li>
+						<li>     Dokonano porównania rozważanych platform</li>
+						<!-- <li>     Stworzono funkcję decydującą o najlepszym wariancie</li>
+						<li>     Na podstawie stworzonej funkcji wybrano najlepszy wariant</li>
+						<li>     Dokonano oceny metody szacowania pracochłonności oprogramowania pod względem przydatności przy tworzeniu oprogramowania systemów wbudowanych</li>
+						<li>     Spełniono następujące wymagania funkcjonalne:</li>
+								<ul>
+								<li>             UC6: Badanie obrazu</li>
+								<li>             UC7: Oznaczanie twarzy na obrazie</li>
+								<li>             UC8: Udostępnienie obrazu z oznaczonymi twarzami na ekranie</li>
+								</ul>
+						<li>        Dziłający prototyp można udostępnić klientowi, a wymagania funkcjonalne o mniejszym priorytecie zaimplementować w późniejszym czasie</li>
+						<li>     Stworzono trzy systemy wbudowane dedykowane do detekcji twarzy oraz wybrano ten, który najlepiej spełnia funkcję oceny</li> -->
+						</ul>
+					</small>
+				</section>
+				<section>
+					<small>
+					<ul>
+						<li>     Stworzono funkcję decydującą o najlepszym wariancie</li>
+						<li>     Na podstawie stworzonej funkcji wybrano najlepszy wariant</li>
+						<li>     Dokonano oceny metody szacowania pracochłonności oprogramowania pod względem przydatności przy tworzeniu oprogramowania systemów wbudowanych</li>
+						<li>     Spełniono następujące wymagania funkcjonalne:</li>
+								<ul>
+								<li>             UC6: Badanie obrazu</li>
+								<li>             UC7: Oznaczanie twarzy na obrazie</li>
+								<li>             UC8: Udostępnienie obrazu z oznaczonymi twarzami na ekranie</li>
+								</ul>
+						<li>        Działający prototyp można udostępnić klientowi, a wymagania funkcjonalne o mniejszym priorytecie zaimplementować w późniejszym czasie</li>
+						<li>     Stworzono trzy systemy wbudowane dedykowane do detekcji twarzy oraz wybrano ten, który najlepiej spełnia funkcję oceny</li>
+						</ul>
+					</small>
+				</section>
+			</section>
+				<!-- <section>
+					<h2>Dalsze plany</h2>
+					<small>
+						<ul>
+							<li>Udoskonalić własne rozwiązanie</li>
+							<li>Wyznaczenie złożoności\rozmiaru oprogramowania każdego z wcześniej przedstawianych algorytmów metodą COSMIC</li>
+							<li>Dokończyć uczenie sieci MobilnetV3</li>
+							<li>Dokończyć aspekt teoretyczny dot. modelu sieci neuronowej MobilenetV3</li>
+							<li>Przetestować rozwiązanie oparte o przeglądarkę internetową, wyznaczyć pracochłonność takie podejścia do projektu</li>
+							<li>Dokonać zrównoleglenia algorytmu A fast and accurate unconstrained face detector za pomocą dyrektyw OpenACC</li>
+							<li>Przetestować wybrane algorytmy na wybranych platformach oraz dokonać porównania platform pod względem możliwości zastosowania jako rozwiązania systemu wbudowanego</li>
+						</ul>
+					</small>
+				</section>					 -->
+<!-- 				
+				<section>
+					<section>
+						<small>
+							<div align="left">
+								<p>[1]    http://www.linfo.org/embedded_system.html, (2020.01.01)</p>
+								<p>[2]    Skalski Ł., Linux podstawy i aplikacje dla systemów embedded, BTC, 2012, 10-13</p>
+								<p>[3]    El Kaddouhi S., Saaidi A., Abarkan M., A New Robust Face Detection Method Based on Corner Points, International Journal of Software Engineering and Its Applications Vol. 8, No. 11, 2014, 25-40</p>
+								<p>[4]	  http://algorytmy.ency.pl/artykul/notacja_duzego_o (2020.01.01)</p>
+								<p>[5]	  http://wazniak.mimuw.edu.pl/index.php?title=Inżynieria_oprogramowania (2020.01.01)</p>
+								<p>[6]	  http://wazniak.mimuw.edu.pl/index.php?title=Zaawansowana_inżynieria_oprogramowania (2020.01.01)</p>
+								<p>[7]	  hhttps://www.mountaingoatsoftware.com/articles/estimating-with-use-case-points (2020.01.01)</p>
+							</div>
+						</small>		
+					</section>
+					<section>
+						<small>
+							<div align="left">
+								<p>[8]    Paschalakis, S., Bober M., Real-time face detection and tracking for mobile videoconferencing, 2004, Real-Time Imaging, 81–94</p>
+								<p>[9]    Viola P., Jones J. M., Robust Real-Time Face Detection, International Journal of Computer Vision 57(2), 2004, 137-154</p>
+								<p>[10]   Bourdev L., Brandt J., Robust Object Detection Via Soft Cascade, IEEE 	Computer Society Conference on Computer Vision and Pattern 	Recognition, 2005, 236 - 243</p>
+								<p>[11]   Liao S., Jain A. K., Li S. Z., A Fast and Accurate Unconstrained Face 		Detector, IEEE Computer Society Conference on Computer Vision and 	Pattern Recognition, 2015, 211 - 223</p>
+								<p>[12]   http://vis-www.cs.umass.edu/fddb/index.html (2020.01.01)</p>
+								<p>[13]	  https://towardsdatascience.com/everything-you-need-to-know-about-mobilenetv3-and-its-comparison-with-previous-versions-a5d5e5a6eeaa(2020.01.01)</p>
+								<p>[14]   http://www.se.cs.put.poznan.pl/knowledge-base/software-engineering-blog/ucp?set_language=pl</p>
+							</div>
+						</small>		
+					</section>
+				</section>
+ -->
+
+				<section>
+					<section>
+						<h1>dziękuję za uwagę</h1>
+					</section>
+				</section>
+			</div>
+		</div>
+
+		<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
+		<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+			// More info about config & dependencies:
+			// - https://github.com/hakimel/reveal.js#configuration
+			// - https://github.com/hakimel/reveal.js#dependencies
+			Reveal.initialize({
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/highlight/highlight.js', async: true }
+				]
+			});
+		</script>
+	</body>
+</html>
